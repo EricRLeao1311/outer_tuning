@@ -3,6 +3,7 @@ echo '##### USER: (root) ##### PASS: ('$MYSQL_ROOT_PASSWORD') ##### DB: ('$MYSQL
 
 mysql -uroot -p$MYSQL_ROOT_PASSWORD --execute="SET GLOBAL log_output = 'TABLE'"
 mysql -uroot -p$MYSQL_ROOT_PASSWORD --execute="SET GLOBAL general_log = 'ON'"
+mysql -uroot -p$MYSQL_ROOT_PASSWORD --execute="SET GLOBAL event_scheduler = ON;"
 
 mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --execute="DROP TABLE IF EXISTS NATION";
 mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE \
@@ -104,3 +105,79 @@ mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE \
                                     L_SHIPMODE     CHAR(10) NOT NULL,
                                     L_COMMENT      VARCHAR(44) NOT NULL )";
 mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --execute="LOAD DATA INFILE '/opt/lineitem.tbl' INTO TABLE LINEITEM FIELDS TERMINATED BY '|'";
+
+mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE \
+--execute="DROP procedure IF EXISTS create_matview;
+CREATE procedure create_matview( matview varchar(64), view_name varchar(64))
+    NOT DETERMINISTIC
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLSTATE '42000'
+        SELECT 'ERROR! a matview or table with that name exists. will not proceed' as ERR;
+    DECLARE EXIT HANDLER FOR SQLSTATE '23000'
+        SELECT 'ERROR! a matview with that already name exists. will not proceed' as ERR;
+    IF (select count(*)
+        from information_schema.tables
+        where table_schema in (select database())
+          and table_name=matview
+    ) THEN
+        call raise_error;
+    END IF;
+    SET @time_start = CURRENT_TIMESTAMP();
+    SET @crtbl= CONCAT('CREATE TABLE ',matview,' as select * from ', view_name);
+    prepare stmt from @crtbl;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+    SET @time_stop = CURRENT_TIMESTAMP();
+    SELECT @time_start as Refresh_start, @time_stop as Refresh_end;
+    INSERT INTO matviews (mv, view, last_refresh,refresh_time) VALUES (matview, view_name, @time_start, UNIX_TIMESTAMP(@time_stop) -UNIX_TIMESTAMP(@time_start));
+END;
+delimiter ;
+delimiter //
+DROP procedure IF EXISTS refresh_matview;
+CREATE procedure refresh_matview( matview varchar(64))
+    NOT DETERMINISTIC
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLSTATE '42000'
+        SELECT 'ERROR! a matview with that name does not exist, will not proceed' as ERR;
+    IF (select count(*)!=1
+        from matviews
+        where mv= matview
+    ) THEN  call raise_error;
+    END IF;
+    START TRANSACTION;
+    SET @time_start = CURRENT_TIMESTAMP();
+    SET @v_name = (SELECT view from matviews where mv=matview limit 1);
+    SET @crtbl= CONCAT('DELETE FROM ',matview);
+    prepare stmt from @crtbl;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+    SET @crtbl= CONCAT('INSERT INTO ',matview,' SELECT * FROM ',@v_name);
+    prepare stmt from @crtbl;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+    SET @time_stop = CURRENT_TIMESTAMP();
+    SELECT @time_start as Refresh_start, @time_stop as Refresh_end;
+    update matviews set last_refresh = @time_start, refresh_time=UNIX_TIMESTAMP(@time_stop) -UNIX_TIMESTAMP(@time_start) where mv=matview;
+    COMMIT;
+END//
+delimiter ;
+delimiter //
+DROP procedure IF EXISTS drop_matview;
+CREATE procedure drop_matview( matview varchar(64))
+    NOT DETERMINISTIC
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLSTATE '42000'
+        SELECT 'ERROR! a matview with that name does not exist, will not proceed' as ERR;
+    SET AUTOCOMMIT=0;
+    IF (select count(*)!=1   from matviews  where mv= matview  )
+    THEN  call raise_error;
+    END IF;
+    START TRANSACTION;
+    SET @crtbl= CONCAT('drop table ',matview);
+    prepare stmt from @crtbl;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+    delete from matviews where mv=matview;
+    COMMIT;
+END//
+delimiter ;"

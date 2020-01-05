@@ -36,7 +36,7 @@ public class VisaoMaterializada extends FunctionConceptBase {
                         Concept VMH = new Concept();
                         VMH.setClassName("VisaoMaterializada");
                         String nomeVM = allComandoDML.getValue("?vm").toString();
-                        float ganho = Float.valueOf(allComandoDML.getValue("?acumulado").toString()) + Float.valueOf(allComandoDML.getValue("?ganho").toString());
+                        float ganho = Float.parseFloat(allComandoDML.getValue("?acumulado").toString()) + Float.parseFloat(allComandoDML.getValue("?ganho").toString());
 
                         VMH.setName(nomeVM);
                         Property temGanho = new Property();

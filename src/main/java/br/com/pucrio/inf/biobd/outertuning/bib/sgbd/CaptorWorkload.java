@@ -57,14 +57,12 @@ public final class CaptorWorkload {
                     currentTable.setSchema(schemaResult.getString(1));
                     currentTable.setName(schemaResult.getString(2));
                     currentTable.setNumberRows(schemaResult.getLong(3));
-                    switch (config.getProperty("sgbd")) {
-                        case "oracle":
-                            long pagesize = Integer.valueOf(config.getProperty("pagesize" + config.getProperty("sgbd")));
-                            long numPage = schemaResult.getLong(4) / pagesize;
-                            currentTable.setNumberPages(numPage);
-                            break;
-                        default:
-                            currentTable.setNumberPages(schemaResult.getLong(4));
+                    if ("oracle".equals(config.getProperty("sgbd"))) {
+                        long pagesize = Integer.parseInt(config.getProperty("pagesize" + config.getProperty("sgbd")));
+                        long numPage = schemaResult.getLong(4) / pagesize;
+                        currentTable.setNumberPages(numPage);
+                    } else {
+                        currentTable.setNumberPages(schemaResult.getLong(4));
                     }
                     currentTable.setFields(this.getColumns(currentTable.getSchema(), currentTable.getName()));
                     log.msg("Table: " + currentTable.getName());
@@ -96,7 +94,7 @@ public final class CaptorWorkload {
                     Column currentColumn = new Column();
                     currentColumn.setOrder(fields.getInt("ordernum"));
                     currentColumn.setName(fields.getString("columnname"));
-                    currentColumn.setTable(fields.getString("tablename"));
+                    currentColumn.setTable(tableName);
                     currentColumn.setNotNull(fields.getBoolean("isnull"));
                     currentColumn.setType(fields.getString("typefield"));
                     currentColumn.setDomainRestriction(fields.getString("domainrestriction"));

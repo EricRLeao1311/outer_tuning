@@ -36,7 +36,7 @@ public class ConnectionSGBD {
                         connection = DriverManager.getConnection(config.getProperty("urlSGBD") + "databaseName=" + config.getProperty("databaseName") + ";", config.getProperty("userSGBD"), config.getProperty("pwdSGBD"));
                         break;
                     case "mysql":
-                        Class.forName("com.mysql.jdbc.Driver");
+                        Class.forName("com.mysql.cj.jdbc.Driver");
                         connection = DriverManager.getConnection(config.getProperty("urlSGBD") + config.getProperty("databaseName"), config.getProperty("userSGBD"), config.getProperty("pwdSGBD"));
                         break;
                     case "postgresql":

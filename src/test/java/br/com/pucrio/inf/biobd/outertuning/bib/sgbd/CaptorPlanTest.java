@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -42,7 +43,7 @@ public class CaptorPlanTest {
                 assertTrue(true);
             } else {
                 plan.debug();
-                assertTrue(false);
+                fail();
             }
         }
     }
@@ -56,7 +57,7 @@ public class CaptorPlanTest {
                 assertTrue(true);
             } else {
                 plan.debug();
-                assertTrue(false);
+                fail();
             }
         }
     }

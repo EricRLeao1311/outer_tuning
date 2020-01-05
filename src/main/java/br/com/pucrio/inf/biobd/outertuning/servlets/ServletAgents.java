@@ -136,7 +136,7 @@ public class ServletAgents extends ServletBase {
     private void setRequestSQLDetails(String sqlParameter, String windowParameter) {
         if (sqlParameter != null && !sqlParameter.equals("empty")) {
             try {
-                int id = Integer.valueOf(URLDecoder.decode(sqlParameter.trim().split("#")[1], "UTF8"));
+                int id = Integer.parseInt(URLDecoder.decode(sqlParameter.trim().split("#")[1], "UTF8"));
                 request.setAttribute("sqlSelected", id);
                 if (windowParameter != null) {
                     request.setAttribute("intervalAsked", this.controller.getIntervalAsked(this.windowSize, URLDecoder.decode(windowParameter, "UTF8")));
@@ -157,7 +157,7 @@ public class ServletAgents extends ServletBase {
             ArrayList<Concept> concepts = obj.getIndividualsForInstantiate(this.controller.OTAgent.sourceDebug);
             for (Concept concept : concepts) {
                 System.out.println(concept.getMsgToPrint());
-            };
+            }
         } catch (SecurityException | InstantiationException | IllegalAccessException ex) {
             log.error(ex);
         }

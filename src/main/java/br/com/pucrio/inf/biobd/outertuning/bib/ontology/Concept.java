@@ -62,15 +62,15 @@ public class Concept {
     }
 
     public String getMsgToPrint() {
-        String msg = "CONCEITO: " + this.getClassName();
+        StringBuilder msg = new StringBuilder("CONCEITO: " + this.getClassName());
 
         for (Property param : this.paramOut) {
             if (param.getValue() != null) {
-                msg += " " + param.getDataType() + ": " + param.getValue().toString() + ";";
+                msg.append(" ").append(param.getDataType()).append(": ").append(param.getValue().toString()).append(";");
             }
         }
 
-        return msg;
+        return msg.toString();
     }
 
 }
