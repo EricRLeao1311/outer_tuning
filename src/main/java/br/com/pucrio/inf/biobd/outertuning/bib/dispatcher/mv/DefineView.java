@@ -50,21 +50,21 @@ public class DefineView {
 
     public void gerateClauseSelectForDDLView(SQL query) {
         this.select = query.getClauseFromSql("select").trim();
-        String fields = ", ";
+        StringBuilder fields = new StringBuilder(", ");
         if (!this.select.equals("select *")) {
             for (Table table : query.getTablesQuery()) {
                 for (Column field : table.getFields()) {
                     if (query.getSql().toLowerCase().contains(field.getName()) && !select.toLowerCase().contains(field.getName())) {
-                        if (!fields.equals(", ")) {
-                            fields += ", ";
+                        if (!fields.toString().equals(", ")) {
+                            fields.append(", ");
                         }
-                        fields += field.getName();
+                        fields.append(field.getName());
                     }
                 }
             }
         }
         this.select = query.getComents() + this.select + fields;
-        this.groupBy = fields;
+        this.groupBy = fields.toString();
     }
 
     public void gerateClauseFromForDDLView(SQL query) {
@@ -132,7 +132,7 @@ public class DefineView {
     }
 
     private boolean containNumber(String word) {
-        if (word.contains("0")
+        return word.contains("0")
                 || word.contains("1")
                 || word.contains("2")
                 || word.contains("3")
@@ -141,10 +141,7 @@ public class DefineView {
                 || word.contains("6")
                 || word.contains("7")
                 || word.contains("8")
-                || word.contains("9")) {
-            return true;
-        }
-        return false;
+                || word.contains("9");
     }
 
 }

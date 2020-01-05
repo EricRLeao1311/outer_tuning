@@ -37,55 +37,20 @@ services:
 
 `mysql -uroot -pexample mysql`
 
-# Postgres
+### Maven Build Locally
 
-### Tratar arquivos para postgres
-
-`sed -ie 's/.$//' *.tbl`
-
-### Docker-compose
-
-```yml
-  postgres:
-    image: postgres:11
-    restart: always
-    volumes:
-      - ./dbtest:/opt
-    ports:
-      - 5432:5432
-    environment:
-      POSTGRES_PASSWORD: example
+```
+mvn clean install -DskipTests -f pom.xml
 ```
 
-### Running
+### Maven Build Docker
 
-`psql -U postgres -p example -d postgres  -p 5432`
-
->COPY nation FROM '/opt/nation.tbl' ( FORMAT CSV, DELIMITER ('|') );
->COPY region FROM '/opt/region.tbl' ( FORMAT CSV, DELIMITER ('|') );
->COPY part FROM '/opt/part.tbl' ( FORMAT CSV, DELIMITER ('|') );
->COPY supplier FROM '/opt/supplier.tbl' ( FORMAT CSV, DELIMITER ('|') );
->COPY partsupp FROM '/opt/partsupp.tbl' ( FORMAT CSV, DELIMITER ('|') );
->COPY customer FROM '/opt/customer.tbl' ( FORMAT CSV, DELIMITER ('|') );
->COPY orders FROM '/opt/orders.tbl' ( FORMAT CSV, DELIMITER ('|') );
->COPY lineitem FROM '/opt/lineitem.tbl' ( FORMAT CSV, DELIMITER ('|') );
-
-# Oracle
-
-### Docker-compose
-
-```yml
-  oracle:
-    image: deepdiver/docker-oracle-xe-11g
-    restart: always
-    volumes:
-      - ./dbtest-bkp:/opt
-    ports:
-      - 1521:1521
+```
+mvn clean install -P docker -DskipTests -f pom.xml
 ```
 
-### Load
+### Run Locally
 
-`echo "LOAD DATA  INFILE '/opt/customer.tbl' INTO TABLE CUSTOMER FIELDS TERMINATED BY '|'" > loader.ctl`
-
-`sqlldr system/oracle@localhost:1521/XE control=loader.ctl`
+```
+mvn tomcat7:run -f pom.xml
+```

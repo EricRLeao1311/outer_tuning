@@ -65,8 +65,8 @@ public class MaterializedView extends SQL {
     }
 
     public void setHypoNumPages() {
-        double fillfactory = Double.valueOf(config.getProperty("fillfactory" + config.getProperty("sgbd")));
-        int pagesize = Integer.valueOf(config.getProperty("pagesize" + config.getProperty("sgbd")));
+        double fillfactory = Double.parseDouble(config.getProperty("fillfactory" + config.getProperty("sgbd")));
+        int pagesize = Integer.parseInt(config.getProperty("pagesize" + config.getProperty("sgbd")));
         this.hypoNumPages = (long) ((this.hypoPlan.getNumRow() * this.hypoPlan.getRowSize() * fillfactory) / pagesize);
         if (this.hypoNumPages < 1) {
             this.hypoNumPages = 1;

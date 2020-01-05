@@ -1,29 +1,26 @@
-<%@page import="br.com.pucrio.inf.biobd.outertuning.bib.configuration.Configuration"%>
+<%@page import="br.com.pucrio.inf.biobd.outertuning.bib.base.Interval"%>
 <%@page import="br.com.pucrio.inf.biobd.outertuning.bib.sgbd.ActionSF"%>
 <%@page import="br.com.pucrio.inf.biobd.outertuning.bib.sgbd.Plan"%>
-<%@page import="br.com.pucrio.inf.biobd.outertuning.bib.base.Interval"%>
 <%@page import="br.com.pucrio.inf.biobd.outertuning.bib.sgbd.SQL"%>
-<%@page import="java.util.Locale"%>
-<%@page import="java.text.DecimalFormatSymbols"%>
-<%@page import="java.text.DecimalFormat"%>
-<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.text.DateFormat"%>
-<%@page import="java.util.Iterator"%>
-<%@page import="java.util.concurrent.CopyOnWriteArrayList"%>
-<%@page import="java.util.Date"%>
+<%@page import="java.text.DecimalFormat"%>
+<%@page import="java.text.DecimalFormatSymbols"%>
+<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="java.math.RoundingMode"%>
+<%@page import="java.util.Iterator"%>
+<%@page import="java.util.Locale"%>
 
 <!-- === BEGIN HEADER === -->
 <!DOCTYPE html>
 <!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
 <!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
-<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
-    <head>
-        <!-- Title -->
-        <title>OT - Workload</title>
-        <!-- Meta -->
-        <jsp:include page="helpers/includesHeader.jsp"/>
+<!--[if !IE]><!-->
+<html lang="en"> <!--<![endif]-->
+<head>
+    <!-- Title -->
+    <title>OT - Workload</title>
+    <!-- Meta -->
+    <jsp:include page="helpers/includesHeader.jsp"/>
         <script type="text/javascript">
             google.charts.setOnLoadCallback(drawChart);
             function drawChart() {
@@ -128,7 +125,7 @@
                                 </a>
                             </h4>
                         </div>
-                        <div id="collapse-<%=sqlIn.get(i).getId()%>" class="accordion-body collapse <% if (sqlIn.get(i).getId() == (int) request.getAttribute("sqlSelected")) {%><%="in"%> <%}%>" style="height: <% if (sqlIn.get(i).getId() == (int) request.getAttribute("sqlSelected")) {%><%="auto"%> <%} else {%><%="0px"%> <%}%>;">
+                        <div id="collapse-<%=sqlIn.get(i).getId()%>" class="accordion-body collapse <% if (request.getAttribute("sqlSelected") != null && sqlIn.get(i).getId() == (int) request.getAttribute("sqlSelected")) {%><%="in"%> <%}%>" style="height: <% if (sqlIn.get(i).getId() == (int) request.getAttribute("sqlSelected")) {%><%="auto"%> <%} else {%><%="0px"%> <%}%>;">
                             <div class="panel-body">
 
                                 <div class="modules_sql row">

@@ -7,11 +7,15 @@
 package br.com.pucrio.inf.biobd.outertuning.bib.configuration;
 
 import javax.servlet.ServletContext;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -19,18 +23,11 @@ import java.util.regex.Pattern;
 
 public class Configuration {
 
-    public static final String PARAMETERS = "/WEB-INF/parameters";
+    public static final String PARAMETERS = "/parameters";
 
     private static Properties prop;
 
-    private final ServletContext context;
-
     public Configuration() {
-        this(null);
-    }
-
-    public Configuration(ServletContext context) {
-        this.context = context;
         this.getPropertiesFromFile();
     }
 
@@ -39,26 +36,33 @@ public class Configuration {
             try {
                 Configuration.prop = new Properties();
                 Properties propTemp = new Properties();
-                Set<String> paths = context.getResourcePaths(PARAMETERS);
-                for (String path : paths) {
-                    if (path.endsWith(".properties")) {
-                        try (InputStream is = context.getResourceAsStream(path)) {
-                            propTemp.load(is);
-                            propTemp.values().stream().map(Object::toString).filter(s -> s.endsWith(".properties"))
+                URL resource = Configuration.class.getClassLoader().getResource(PARAMETERS);
+                if (resource != null) {
+
+                    File file = new File(resource.toURI());
+                    if (file.isDirectory()) {
+                        for (File f : Objects.requireNonNull(file.listFiles())) {
+                            if (f.isDirectory()) {
+                                continue;
+                            }
+                            propTemp.load(new FileInputStream(f));
+                            propTemp.values().stream().map(Object::toString)
+                                    .filter(s -> s.endsWith(".properties"))
                                     .map(this::readProp)
+                                    .filter(Objects::nonNull)
                                     .forEach(prop::putAll);
                             prop.putAll(propTemp);
                         }
                     }
                 }
-            } catch (IOException e) {
+            } catch (IOException | URISyntaxException e) {
                 System.err.print(e);
             }
         }
     }
 
     private Properties readProp(String value) {
-        try (InputStream is = context.getResourceAsStream(PARAMETERS + value)) {
+        try (InputStream is = Configuration.class.getClassLoader().getResourceAsStream(PARAMETERS + value)) {
             Properties temp = new Properties();
             temp.load(is);
             return temp;
@@ -70,8 +74,10 @@ public class Configuration {
 
     public URI getResourceURI(String property) {
         try {
-            return this.context.getResource("/WEB-INF/" + property).toURI();
-        } catch (MalformedURLException | URISyntaxException e) {
+
+            URL resource = Configuration.class.getClassLoader().getResource( property);
+            return resource != null ? resource.toURI() : null;
+        } catch (URISyntaxException e) {
             return null;
         }
     }

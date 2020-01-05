@@ -98,7 +98,7 @@ public class ServletAgents extends ServletBase {
             memory = new Memory();
         }
         if (config == null) {
-            config = new Configuration(getServletContext());
+            config = new Configuration();
         }
         if (log == null) {
             log = new Log(config);

@@ -10,7 +10,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
  * @author Rafael
  */
 public class PlanPostgreSQL extends Plan {
@@ -26,7 +25,7 @@ public class PlanPostgreSQL extends Plan {
         if (!this.getPlan().isEmpty()) {
             int ini = this.getPlan().indexOf("") + 2;
             int end = this.getPlan().substring(ini).indexOf(".") + ini;
-            return Long.valueOf(this.getPlan().substring(ini, end));
+            return Long.parseLong(this.getPlan().substring(ini, end));
         }
         return 0;
     }
@@ -36,7 +35,7 @@ public class PlanPostgreSQL extends Plan {
         if (!this.getPlan().isEmpty()) {
             int ini = this.getPlan().indexOf("rows=") + 5;
             int end = this.getPlan().substring(ini).indexOf(" ") + ini;
-            return Long.valueOf(this.getPlan().substring(ini, end));
+            return Long.parseLong(this.getPlan().substring(ini, end));
         }
         return 0;
     }
@@ -46,7 +45,7 @@ public class PlanPostgreSQL extends Plan {
         if (!this.getPlan().isEmpty()) {
             int ini = this.getPlan().indexOf("width=") + 6;
             int end = this.getPlan().substring(ini).indexOf(")") + ini;
-            return Long.valueOf(this.getPlan().substring(ini, end));
+            return Long.parseLong(this.getPlan().substring(ini, end));
         }
         return 0;
     }
@@ -54,11 +53,11 @@ public class PlanPostgreSQL extends Plan {
     @Override
     public ArrayList<SeqScan> getSeqScanOperations() {
 
-        ArrayList<SeqScan> sso = new ArrayList();
-        ArrayList<Filter> filters = new ArrayList();
+        ArrayList<SeqScan> sso = new ArrayList<>();
+        ArrayList<Filter> filters = new ArrayList<>();
         //String plan = null;
-        String name = null, fType = null;
-        String[] attributes = null;
+        String name = null, fType;
+        String[] attributes;
         long seqScanCost = getCost();
         long rows = getNumRow();
 
@@ -83,8 +82,11 @@ public class PlanPostgreSQL extends Plan {
                 name = nameM.group();
             }
 
-            int a = name.indexOf(' ');
-            name = name.substring(0, a);
+            int a;
+            if (name != null) {
+                a = name.indexOf(' ');
+                name = name.substring(0, a);
+            }
 
             str = rest_cols.matcher(scan[i]);
             while (str.find()) {
@@ -149,7 +151,7 @@ public class PlanPostgreSQL extends Plan {
     public String hypotheticalPlan(String hp) {
         int quantidade = 0, pos;
         String[] attributes = null;
-        String indexName = null;
+        StringBuilder indexName = null;
         StringBuilder bSql = null;
         String copyhp = hp;
         hp = (hp).toLowerCase();
@@ -186,7 +188,6 @@ public class PlanPostgreSQL extends Plan {
 
             for (int i = 0; i < attributes.length; i++) {
                 bSql = new StringBuilder(attributes[i]);
-                pos = 0;
                 if (attributes[i].matches(".*[<].*")) {
                     //Deletando parte desnecessaria do plano
                     pos = attributes[i].indexOf("<");
@@ -208,9 +209,11 @@ public class PlanPostgreSQL extends Plan {
         }
 
         //Obter o nome do índice
-        indexName = attributes[0];
-        for (int i = 1; i < attributes.length; i++) {
-            indexName += "_" + attributes[i];
+        if (attributes != null) {
+            indexName = new StringBuilder(attributes[0]);
+            for (int i = 1; i < attributes.length; i++) {
+                indexName.append("_").append(attributes[i]);
+            }
         }
 
         bSql = new StringBuilder(hp);
@@ -233,12 +236,12 @@ public class PlanPostgreSQL extends Plan {
         if ((!this.getPlan().isEmpty()) && (this.getPlan().contains("Execution time"))) {
             int ini = this.getPlan().indexOf("Execution time:") + 15;
             int end = this.getPlan().substring(ini).indexOf("ms") + ini;
-            float exec = Float.valueOf(this.getPlan().substring(ini, end));
+            float exec = Float.parseFloat(this.getPlan().substring(ini, end));
 
             ini = this.getPlan().indexOf("Planning time:") + 15;
             end = this.getPlan().substring(ini).indexOf("ms") + ini;
 
-            float planingTime = Float.valueOf(this.getPlan().substring(ini, end));
+            float planingTime = Float.parseFloat(this.getPlan().substring(ini, end));
             return exec + planingTime;
         } else {
             return 0;

@@ -35,18 +35,8 @@ public class Dispatcher extends Semantic {
         try {
             File f = new File(jarPath);
             URLClassLoader u = new URLClassLoader(new URL[]{f.toURI().toURL()});
-            Class c = u.loadClass(className);
-            Method[] tp = c.getMethods();
-            Class<?>[] paramsType = null;
-            for (Method type : tp) {
-                if (type.toString().contains(methodName)) {
-                    paramsType = type.getParameterTypes();
-                }
-            }
-            Method met = c.getMethod(methodName, paramsType);
-            Object obj = c.newInstance();
-            Object result = met.invoke(obj, params);
-            return result;
+            Class<?> c = u.loadClass(className);
+            return getObject(methodName, params, c);
         } catch (InstantiationException | MalformedURLException | ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             log.msg(jarPath);
             log.msg(className);
@@ -59,18 +49,8 @@ public class Dispatcher extends Semantic {
 
     private Object invokeMethodFromClass(String className, String methodName, Object params) {
         try {
-            Class c = (Class) Class.forName(className);
-            Method[] tp = c.getMethods();
-            Class<?>[] paramsType = null;
-            for (Method type : tp) {
-                if (type.toString().contains(methodName)) {
-                    paramsType = type.getParameterTypes();
-                }
-            }
-            Method met = c.getMethod(methodName, paramsType);
-            Object obj = c.newInstance();
-            Object result = met.invoke(obj, params);
-            return result;
+            Class<?> c = Class.forName(className);
+            return getObject(methodName, params, c);
         } catch (InstantiationException | ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             log.msg(className);
             log.msg(methodName);
@@ -80,6 +60,20 @@ public class Dispatcher extends Semantic {
         }
     }
 
+    private Object getObject(String methodName, Object params, Class<?> c) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        Method[] tp = c.getMethods();
+        Class<?>[] paramsType = null;
+        for (Method type : tp) {
+            if (type.toString().contains(methodName)) {
+                paramsType = type.getParameterTypes();
+            }
+        }
+        Method met = c.getMethod(methodName, paramsType);
+        Object obj = c.newInstance();
+        return met.invoke(obj, params);
+    }
+
+    @SuppressWarnings("unchecked")
     public ArrayList<Concept> executeSource(Source source) {
         if (config.getProperty("debug_params_library").contains("1")) {
             log.msg(source.getHeuristic());

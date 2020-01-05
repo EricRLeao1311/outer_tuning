@@ -44,7 +44,7 @@ public class ServletBase extends HttpServlet {
         this.response = response;
         this.output = "";
         this.param = "";
-        this.config = new Configuration(getServletContext());
+        this.config = new Configuration();
         this.log = new Log(config);
 
         this.response.setContentType("text/html;charset=UTF-8");
