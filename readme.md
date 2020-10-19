@@ -37,20 +37,20 @@ services:
 
 `mysql -uroot -pexample mysql`
 
-### Maven Build Locally
+### Para buildar o projeto
 
 ```
-mvn clean install -DskipTests -f pom.xml
+make
 ```
 
-### Maven Build Docker
+### Para rodar os projetos
 
 ```
-mvn clean install -P docker -DskipTests -f pom.xml
+docker-compose up
 ```
 
-### Run Locally
+### Para acessar o projeto
 
 ```
-mvn tomcat7:run -f pom.xml
+http://localhost/
 ```

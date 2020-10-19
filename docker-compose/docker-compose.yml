@@ -20,7 +20,7 @@ services:
 
   workload:
     image: workload-executor
-    restart: always
+    restart: on-failure
     build:
       context: ./tpch_workload_executor
       dockerfile: ./Dockerfile
