@@ -1,3 +1,23 @@
+# Executando o projeto
+
+### Para buildar o projeto
+
+```
+make
+```
+
+### Para rodar os projetos
+
+```
+docker-compose up
+```
+
+### Acessar o projeto
+
+```
+http://localhost/
+```
+
 # Mysql
 
 O docker-compose ja esta sendo criando e populando as tabelas:
@@ -36,21 +56,3 @@ services:
 ### Login banco
 
 `mysql -uroot -pexample mysql`
-
-### Para buildar o projeto
-
-```
-make
-```
-
-### Para rodar os projetos
-
-```
-docker-compose up
-```
-
-### Para acessar o projeto
-
-```
-http://localhost/
-```
