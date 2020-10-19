@@ -18,7 +18,6 @@ import br.com.pucrio.inf.biobd.outertuning.bib.sgbd.SQL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -47,7 +46,7 @@ public class CoordenatorAgent {
     }
 
     public String capturedQueryByWindow(String windowSize) {
-        String dataLine = "";
+        StringBuilder dataLine = new StringBuilder();
         ArrayList<SQL> sqlIn = new ArrayList<>();
         IntervalList list = new IntervalList();
         ArrayList<Interval> inter = list.getIntervals(windowSize);
@@ -55,17 +54,13 @@ public class CoordenatorAgent {
         float cost;
         int count;
         for (int i = inter.size() - 1; i >= 0; i--) {
-            dataLine += ",\n['" + inter.get(i).getIni(this.getMaskByWindowSize(windowSize)) + "'";
+            dataLine.append(",\n['").append(inter.get(i).getIni(this.getMaskByWindowSize(windowSize))).append("'");
 
-            Iterator<SQL> itrSQL = lastSQLCaptured.iterator();
-            while (itrSQL.hasNext()) {
-                SQL sql = itrSQL.next();
+            for (SQL sql : lastSQLCaptured) {
                 duration = 0;
                 cost = 0;
                 count = 0;
-                Iterator<Plan> itr = sql.getExecutions().iterator();
-                while (itr.hasNext()) {
-                    Plan execution = itr.next();
+                for (Plan execution : sql.getExecutions()) {
                     if (inter.get(i).isBetween(execution.getDateExecution()) && execution.getDuration() > 0) {
                         if (!sqlIn.contains(sql)) {
                             sqlIn.add(sql);
@@ -76,34 +71,34 @@ public class CoordenatorAgent {
                     }
                 }
                 if (count == 0) {
-                    dataLine += ",0";
+                    dataLine.append(",0");
                 } else {
-                    dataLine += "," + duration;
+                    dataLine.append(",").append(duration);
                 }
-                dataLine += ",'<b>SQL #" + sql.getId() + "</b><br>  ";
-                dataLine += "Execution(s): <b>" + count + "</b><br>";
-                dataLine += "Total Time: <b>" + formatDecimalIDE(duration) + "s</b><br> ";
-                dataLine += "Total cost: <b>" + formatDecimalIDE(cost) + "</b>'";
+                dataLine.append(",'<b>SQL #").append(sql.getId()).append("</b><br>  ");
+                dataLine.append("Execution(s): <b>").append(count).append("</b><br>");
+                dataLine.append("Total Time: <b>").append(formatDecimalIDE(duration)).append("s</b><br> ");
+                dataLine.append("Total cost: <b>").append(formatDecimalIDE(cost)).append("</b>'");
             }
-            dataLine += "]";
+            dataLine.append("]");
         }
 
-        String firstLine = "['TIME'";
+        StringBuilder firstLine = new StringBuilder("['TIME'");
         for (SQL sql : lastSQLCaptured) {
-            firstLine += ",'SQL #" + sql.getId() + "'";
-            firstLine += ",{type: 'string', role: 'tooltip', 'p': {'html': true}}";
+            firstLine.append(",'SQL #").append(sql.getId()).append("'");
+            firstLine.append(",{type: 'string', role: 'tooltip', 'p': {'html': true}}");
         }
 
         if (sqlIn.isEmpty()) {
-            dataLine = "";
-            firstLine = "['TIME'";
-            firstLine += ",'empty'";
+            dataLine = new StringBuilder();
+            firstLine = new StringBuilder("['TIME'");
+            firstLine.append(",'empty'");
             for (int i = inter.size() - 1; i >= 0; i--) {
-                dataLine += ",\n['" + inter.get(i).getIni(this.getMaskByWindowSize(windowSize)) + "',0]";
+                dataLine.append(",\n['").append(inter.get(i).getIni(this.getMaskByWindowSize(windowSize))).append("',0]");
             }
         }
-        firstLine += "]";
-        return firstLine + dataLine;
+        firstLine.append("]");
+        return firstLine.toString() + dataLine;
     }
 
     public ArrayList<SQL> getSQLbyId(int id) {
@@ -117,9 +112,7 @@ public class CoordenatorAgent {
     public ArrayList<SQL> getSQLbyWindow(String windowSize, String windowSelected) {
         ArrayList<SQL> sqlIn = new ArrayList<>();
         Interval intervalSelected = this.getIntervalAsked(windowSize, windowSelected);
-        Iterator<SQL> itrSQL = lastSQLCaptured.iterator();
-        while (itrSQL.hasNext()) {
-            SQL sql = itrSQL.next();
+        for (SQL sql : lastSQLCaptured) {
             for (Plan execution : sql.getExecutions()) {
                 if (intervalSelected != null && intervalSelected.isBetween(execution.getDateExecution()) && execution.getDuration() > 0) {
                     if (!sqlIn.contains(sql)) {
@@ -198,15 +191,15 @@ public class CoordenatorAgent {
                 }
             }
         }
-        String toChart = "";
+        StringBuilder toChart = new StringBuilder();
         for (int i = 0; i < result.size(); i++) {
-            toChart += result.get(i);
+            toChart.append(result.get(i));
             if (i < (result.size() - 1)) {
-                toChart += ",";
+                toChart.append(",");
             }
         }
-        toChart = "['ACTION_ID', 'Gain Expectancy', 'Creation Cost', 'Type', 'N. of SQL Serviced'], " + toChart;
-        return toChart;
+        toChart.insert(0, "['ACTION_ID', 'Gain Expectancy', 'Creation Cost', 'Type', 'N. of SQL Serviced'], ");
+        return toChart.toString();
     }
 
     public boolean isRunning() {

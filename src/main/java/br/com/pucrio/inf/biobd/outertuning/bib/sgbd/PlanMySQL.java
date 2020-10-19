@@ -4,8 +4,8 @@ import br.com.pucrio.inf.biobd.outertuning.bib.sgbd.mysql.Explain;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -20,7 +20,7 @@ public class PlanMySQL extends Plan {
 
 
     public PlanMySQL(String plan, Date time) {
-        this.duration = time.getTime() - new Date().getTime();
+        this.duration = System.currentTimeMillis() - time.getTime();
         setDateExecution(time);
         setPlan(plan);
         Explain explain;
@@ -64,7 +64,7 @@ public class PlanMySQL extends Plan {
 
     @Override
     public float getDuration() {
-        return duration;
+        return TimeUnit.MILLISECONDS.toSeconds(duration);
     }
 
     @Override

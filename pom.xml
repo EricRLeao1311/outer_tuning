@@ -10,7 +10,8 @@
     <packaging>war</packaging>
 
     <properties>
-        <java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -29,7 +30,13 @@
         </dependency>
 
         <dependency>
-            <version>2.8.7</version>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>wstx-asl</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <dependency>
+            <version>2.7.0</version>
             <artifactId>arq</artifactId>
             <groupId>com.hp.hpl.jena</groupId>
         </dependency>
@@ -250,12 +257,6 @@
         </dependency>
 
         <dependency>
-            <version>3.2.9</version>
-            <artifactId>wstx-asl</artifactId>
-            <groupId>wstx</groupId>
-        </dependency>
-
-        <dependency>
             <version>0.0.1</version>
             <artifactId>swrl-api</artifactId>
             <groupId>org.protege</groupId>
@@ -359,6 +360,15 @@
 
     <repositories>
         <repository>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
             <id>local-libs</id>
             <url>file://${project.basedir}/libraries</url>
         </repository>
@@ -373,9 +383,9 @@
             <url>https://dist.wso2.org/maven2/</url>
         </repository>
         <repository>
-            <id>jahia</id>
-            <name>Jahia</name>
-            <url>http://maven.jahia.org/maven2/</url>
+            <id>hand-china</id>
+            <name>HandChine</name>
+            <url>http://nexus.saas.hand-china.com/content/repositories/rdc/</url>
         </repository>
         <repository>
             <id>collide</id>
@@ -386,19 +396,6 @@
 
     <build>
         <finalName>outertuning</finalName>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.tomcat.maven</groupId>

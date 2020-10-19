@@ -1,10 +1,9 @@
-# Use postgres/example user/password credentials
 version: '3.1'
 
 services:
 
   mysql:
-    image: mysql:8
+    image: mysql:8.0.19
     command: --default-authentication-plugin=mysql_native_password --secure-file-priv=/opt --lower-case-table-names=1
     restart: always
     ports:
@@ -21,7 +20,7 @@ services:
 
   workload:
     image: workload-executor
-    restart: on-failure
+    restart: always
     build:
       context: ./tpch_workload_executor
       dockerfile: ./Dockerfile
@@ -32,9 +31,6 @@ services:
 
   outertuning:
     image: outertuning
-    build:
-      context: ../
-      dockerfile: Dockerfile
     restart: always
     depends_on:
       - mysql
