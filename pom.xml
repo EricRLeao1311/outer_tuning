@@ -387,11 +387,6 @@
             <name>HandChine</name>
             <url>http://nexus.saas.hand-china.com/content/repositories/rdc/</url>
         </repository>
-        <repository>
-            <id>collide</id>
-            <name>Collide</name>
-            <url>http://mvn.collide.info/content/repositories/releases/</url>
-        </repository>
     </repositories>
 
     <build>

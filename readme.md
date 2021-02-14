@@ -1,3 +1,9 @@
+# Problema com docker
+
+```
+docker system prune -a
+```
+
 # Executando o projeto
 
 ### Para buildar o projeto
