@@ -106,6 +106,14 @@ mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE \
                                     L_COMMENT      VARCHAR(44) NOT NULL )";
 mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --execute="LOAD DATA INFILE '/opt/lineitem.tbl' INTO TABLE LINEITEM FIELDS TERMINATED BY '|'";
 
+mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --execute="DROP TABLE IF EXISTS matviews";
+mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE \
+--execute="CREATE TABLE matviews (
+                        mv varchar(64) NOT NULL PRIMARY KEY ,
+                        view varchar(64) NOT NULL ,
+                        last_refresh TIMESTAMP  ,
+                        refresh_time INTEGER )";
+
 mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --execute="DROP procedure IF EXISTS create_matview;"
 mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE \
 --execute="DELIMITER //
@@ -184,6 +192,35 @@ BEGIN
     DEALLOCATE PREPARE stmt;
     delete from matviews where mv = matview;
     COMMIT;
+END //
+
+DELIMITER ;"
+
+mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --execute="DROP EVENT IF EXISTS matview_event;"
+mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE \
+--execute="DELIMITER //
+CREATE EVENT matview_event
+ON SCHEDULE EVERY 5 MINUTE
+DO
+BEGIN
+    DECLARE finished INTEGER DEFAULT 0;
+    DECLARE mvName VARCHAR(200);
+
+    DECLARE curMV CURSOR FOR (select mv from matviews);
+
+    DECLARE CONTINUE HANDLER
+        FOR NOT FOUND SET finished = 1;
+
+    OPEN curMV;
+    getMVName: LOOP
+        FETCH  curMV into mvName;
+        IF finished = 1 THEN
+            LEAVE getMVName;
+        end if;
+        SET @mv = CONCAT(mvName);
+        call refresh_matview(@mv);
+    end loop;
+    CLOSE curMV;
 END //
 
 DELIMITER ;"
