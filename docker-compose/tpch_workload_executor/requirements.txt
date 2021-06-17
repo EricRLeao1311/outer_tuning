@@ -2,8 +2,8 @@ cx-Oracle==7.3.0
 cycler==0.10.0
 kiwisolver==1.1.0
 matplotlib==3.1.2
-mysql==0.0.2
-mysql-connector-python==8.0.18
+mysql==0.0.3
+mysql-connector-python==8.0.19
 numpy==1.18.0
 pandas==0.25.3
 protobuf==3.11.2
