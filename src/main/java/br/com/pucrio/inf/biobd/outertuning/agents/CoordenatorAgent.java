@@ -198,7 +198,8 @@ public class CoordenatorAgent {
                 toChart.append(",");
             }
         }
-        toChart.insert(0, "['ACTION_ID', 'Gain Expectancy', 'Creation Cost', 'Type', 'N. of SQL Serviced'], ");
+        if (toChart.length() > 0)
+            toChart.insert(0, "['ACTION_ID', 'Gain Expectancy', 'Creation Cost', 'Type', 'N. of SQL Serviced'], ");
         return toChart.toString();
     }
 

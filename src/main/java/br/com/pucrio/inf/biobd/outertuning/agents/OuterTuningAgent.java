@@ -82,10 +82,12 @@ public class OuterTuningAgent implements Runnable {
 
     private void executeDispatcher() {
         for (SQL workload : captor.getLastcapturedSQL()) {
+            System.out.println("Execute Dispatcher: Workload - " + workload.getSql());
             if (workload.isWaitAnalysis()) {
                 ArrayList<Source> listOfFuntions = ontology.getPreConditions();
                 ArrayList<String> functionsExecuted = new ArrayList<>();
                 for (Source source : listOfFuntions) {
+                    System.out.println("Function: " + source.getFunctionName() + " " + source.getClassJavaName());
                     source.setWorkload(workload);
                     if (!functionsExecuted.contains(source.getFunctionName()) && this.executeSource(source)) {
                         functionsExecuted.add(source.getFunctionName());
