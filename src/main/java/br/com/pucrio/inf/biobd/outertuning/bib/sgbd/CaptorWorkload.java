@@ -12,6 +12,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.IOException;
+
 
 /**
  *
@@ -37,6 +44,7 @@ public final class CaptorWorkload {
         this.schema = new Schema();
         this.readSchemaDataBase();
         this.captorPlan = new CaptorPlan();
+        this.saveSchemaToJson();
     }
 
     public ConnectionSGBD getConnection() {
@@ -222,6 +230,28 @@ public final class CaptorWorkload {
             }
         }
         return null;
+    }
+
+    public void saveSchemaToJson() {
+        String filePath = "schema.json";
+        File jsonFile = new File(filePath);
+        String absolutePath = jsonFile.getAbsolutePath();
+    
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        try (FileWriter writer = new FileWriter(jsonFile)) {
+            gson.toJson(this.schema, writer);
+            log.msg("Schema saved to JSON file: " + absolutePath);
+        } catch (IOException e) {
+            log.error("Error saving schema to JSON file: " + e.getMessage());
+        }
+    
+        // Lendo o arquivo salvo e exibindo o conteúdo no log
+        try (FileReader reader = new FileReader(jsonFile)) {
+            Object jsonContent = gson.fromJson(reader, Object.class);
+            log.msg("Conteúdo do arquivo JSON salvo: " + gson.toJson(jsonContent));
+        } catch (IOException e) {
+            log.error("Erro ao ler o arquivo JSON salvo: " + e.getMessage());
+        }
     }
 
 }
