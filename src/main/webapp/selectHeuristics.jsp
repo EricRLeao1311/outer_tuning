@@ -1,3 +1,4 @@
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <%@page import="br.com.pucrio.inf.biobd.outertuning.bib.ontology.Heuristic"%>
 <%@page import="java.util.ArrayList"%>
 <!-- === BEGIN HEADER === -->
@@ -58,6 +59,14 @@
                                 </tr>
                                 </p>
                                 <%}%>
+                                <!-- New Heuristic Entry -->
+                                <tr>
+                                    <td> <input type="checkbox" checked="true" name="HeuristicaIndicesDinamicos" value="true"> </td>
+                                    <td>HeuristicaIndicesDinamicos</td>
+                                    <td style="text-align: center;">1.0</td>
+                                    <td>Sugestão de Índice</td>
+                                    <td>Luciana Preciliano</td>
+                                </tr>
                             </table>
                         </center>
                         <br><br>
