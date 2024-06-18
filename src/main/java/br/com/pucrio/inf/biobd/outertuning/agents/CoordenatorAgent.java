@@ -1,14 +1,8 @@
-/*
- * Outer-Tuning - Framework para apoiar a sintonia fina de banco de dados. PUC-RIO.
- * Rafael Pereira de Oliveira [rpoliveira@inf.puc-rio.br].
- * Ana Carolina Almeida [anacrl@gmail.com].
- * Sergio Lifschitz [sergio@inf.puc-rio.br].
- * PUC-RIO - BioBD.
- */
 package br.com.pucrio.inf.biobd.outertuning.agents;
 
 import br.com.pucrio.inf.biobd.outertuning.bib.base.Interval;
 import br.com.pucrio.inf.biobd.outertuning.bib.base.IntervalList;
+import br.com.pucrio.inf.biobd.outertuning.bib.base.Log;
 import br.com.pucrio.inf.biobd.outertuning.bib.configuration.Configuration;
 import br.com.pucrio.inf.biobd.outertuning.bib.ontology.Heuristic;
 import br.com.pucrio.inf.biobd.outertuning.bib.sgbd.ActionSF;
@@ -21,24 +15,28 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * @author Rafael
- */
+import java.util.List;
+import java.util.Iterator;
+
 public class CoordenatorAgent {
 
     private final CopyOnWriteArrayList<SQL> lastSQLCaptured;
     private Thread threadAgentTuning;
     public OuterTuningAgent OTAgent;
     public boolean running = false;
+    private Log log; // Declare o objeto Log
 
-    public CoordenatorAgent(Configuration configuration) {
+    public CoordenatorAgent() {
         this.lastSQLCaptured = new CopyOnWriteArrayList<>();
-        this.OTAgent = new OuterTuningAgent(configuration);
+        this.OTAgent = new OuterTuningAgent(new Configuration());
+        this.log = new Log(new Configuration()); // Inicialize o objeto Log
     }
 
     public void startCaptureWorkload() {
+        log.msg("DEBUG_START_CAPTURE: Initializing OTAgent with lastSQLCaptured");
         this.OTAgent.initialize(lastSQLCaptured);
         if (this.threadAgentTuning == null) {
+            log.msg("DEBUG_START_CAPTURE: Starting threadAgentTuning");
             this.threadAgentTuning = new Thread(OTAgent);
             this.threadAgentTuning.start();
             this.running = true;
@@ -46,17 +44,20 @@ public class CoordenatorAgent {
     }
 
     public String capturedQueryByWindow(String windowSize) {
-        StringBuilder dataLine = new StringBuilder();
+        String dataLine = "";
         ArrayList<SQL> sqlIn = new ArrayList<>();
         IntervalList list = new IntervalList();
         ArrayList<Interval> inter = list.getIntervals(windowSize);
         float duration;
         float cost;
         int count;
+        
+        List<SQL> lastSQLCopy = new ArrayList<>(lastSQLCaptured); // Fazendo uma cópia da lista
+        
         for (int i = inter.size() - 1; i >= 0; i--) {
-            dataLine.append(",\n['").append(inter.get(i).getIni(this.getMaskByWindowSize(windowSize))).append("'");
-
-            for (SQL sql : lastSQLCaptured) {
+            dataLine += ",\n['" + inter.get(i).getIni(this.getMaskByWindowSize(windowSize)) + "'";
+    
+            for (SQL sql : lastSQLCopy) {
                 duration = 0;
                 cost = 0;
                 count = 0;
@@ -71,34 +72,36 @@ public class CoordenatorAgent {
                     }
                 }
                 if (count == 0) {
-                    dataLine.append(",0");
+                    dataLine += ",0";
                 } else {
-                    dataLine.append(",").append(duration);
+                    dataLine += "," + duration;
                 }
-                dataLine.append(",'<b>SQL #").append(sql.getId()).append("</b><br>  ");
-                dataLine.append("Execution(s): <b>").append(count).append("</b><br>");
-                dataLine.append("Total Time: <b>").append(formatDecimalIDE(duration)).append("s</b><br> ");
-                dataLine.append("Total cost: <b>").append(formatDecimalIDE(cost)).append("</b>'");
+                dataLine += ",'<b>SQL #" + sql.getId() + "</b><br>  ";
+                dataLine += "Execution(s): <b>" + count + "</b><br>";
+                dataLine += "Total Time: <b>" + formatDecimalIDE(duration) + "s</b><br> ";
+                dataLine += "Total cost: <b>" + formatDecimalIDE(cost) + "</b>'";
             }
-            dataLine.append("]");
+            dataLine += "]";
         }
-
-        StringBuilder firstLine = new StringBuilder("['TIME'");
-        for (SQL sql : lastSQLCaptured) {
-            firstLine.append(",'SQL #").append(sql.getId()).append("'");
-            firstLine.append(",{type: 'string', role: 'tooltip', 'p': {'html': true}}");
+    
+        String firstLine = "['TIME'";
+        for (SQL sql : lastSQLCopy) {
+            firstLine += ",'SQL #" + sql.getId() + "'";
+            firstLine += ",{type: 'string', role: 'tooltip', 'p': {'html': true}}";
         }
-
+    
         if (sqlIn.isEmpty()) {
-            dataLine = new StringBuilder();
-            firstLine = new StringBuilder("['TIME'");
-            firstLine.append(",'empty'");
+            dataLine = "";
+            firstLine = "['TIME'";
+            firstLine += ",'empty'";
             for (int i = inter.size() - 1; i >= 0; i--) {
-                dataLine.append(",\n['").append(inter.get(i).getIni(this.getMaskByWindowSize(windowSize))).append("',0]");
+                dataLine += ",\n['" + inter.get(i).getIni(this.getMaskByWindowSize(windowSize)) + "',0]";
             }
         }
-        firstLine.append("]");
-        return firstLine.toString() + dataLine;
+        firstLine += "]";
+        log.msg("DEBUG_CAPTURED_QUERY: firstLine: " + firstLine);
+        log.msg("DEBUG_CAPTURED_QUERY: dataLine: " + dataLine);
+        return firstLine + dataLine;
     }
 
     public ArrayList<SQL> getSQLbyId(int id) {
@@ -112,7 +115,9 @@ public class CoordenatorAgent {
     public ArrayList<SQL> getSQLbyWindow(String windowSize, String windowSelected) {
         ArrayList<SQL> sqlIn = new ArrayList<>();
         Interval intervalSelected = this.getIntervalAsked(windowSize, windowSelected);
-        for (SQL sql : lastSQLCaptured) {
+        Iterator<SQL> itrSQL = lastSQLCaptured.iterator();
+        while (itrSQL.hasNext()) {
+            SQL sql = itrSQL.next();
             for (Plan execution : sql.getExecutions()) {
                 if (intervalSelected != null && intervalSelected.isBetween(execution.getDateExecution()) && execution.getDuration() > 0) {
                     if (!sqlIn.contains(sql)) {
@@ -154,7 +159,17 @@ public class CoordenatorAgent {
     }
 
     public ArrayList<Heuristic> getHeuristicsFromOntology() {
-        return this.OTAgent.getAllHeuristics();
+        ArrayList<Heuristic> heuristics = this.OTAgent.getAllHeuristics();
+        
+        // Adicionando a heurística específica da Luciana
+        Heuristic lucianaHeuristic = new Heuristic();
+        lucianaHeuristic.setName("HeuristicaIndicesDinamicos");
+        lucianaHeuristic.setVersion("1.0");
+        lucianaHeuristic.setStrategy("Sugestão de Índice");
+        lucianaHeuristic.setAuthor("Luciana Perciliano");
+        heuristics.add(lucianaHeuristic);
+        
+        return heuristics;
     }
 
     public void setSelectedHeuristics(Heuristic heuristics) {
@@ -183,25 +198,43 @@ public class CoordenatorAgent {
 
     public String getActionsFromChart() {
         ArrayList<String> result = new ArrayList<>();
+        log.msg("DEBUG_ACTIONS_CHART: Starting to gather actions from chart.");
+    
         for (SQL sql : lastSQLCaptured) {
+            log.msg("DEBUG_ACTIONS_CHART: Processing SQL ID: " + sql.getId());
             for (ActionSF actionSF : sql.getActionsSF()) {
+                log.msg("DEBUG_ACTIONS_CHART: Processing ActionSF ID: " + actionSF.getId() + ", Bonus: " + actionSF.getBonus() + ", Creation Cost: " + actionSF.getCreationCost() + ", Type: " + actionSF.getType() + ", SQL Size: " + actionSF.getSql().size());
                 String actionTemp = "['" + actionSF.getId() + "', " + actionSF.getBonus() + ", " + actionSF.getCreationCost() + ", '" + actionSF.getType() + "', " + actionSF.getSql().size() + "]";
                 if (!result.contains(actionTemp)) {
                     result.add(actionTemp);
                 }
             }
         }
-        StringBuilder toChart = new StringBuilder();
-        for (int i = 0; i < result.size(); i++) {
-            toChart.append(result.get(i));
-            if (i < (result.size() - 1)) {
-                toChart.append(",");
+        
+        log.msg("DEBUG_ACTIONS_CHART: Gathering all actions from actionsSF.");
+        for (ActionSF actionSF : this.OTAgent.getAllActions()) {
+            log.msg("DEBUG_ACTIONS_CHART: Processing ActionSF from actionsSF ID: " + actionSF.getId() + ", Bonus: " + actionSF.getBonus() + ", Creation Cost: " + actionSF.getCreationCost() + ", Type: " + actionSF.getType());
+            String actionTemp = "['" + actionSF.getId() + "', " + actionSF.getBonus() + ", " + actionSF.getCreationCost() + ", '" + actionSF.getType() + "', 0]";
+            if (!result.contains(actionTemp)) {
+                result.add(actionTemp);
             }
         }
-        if (toChart.length() > 0)
-            toChart.insert(0, "['ACTION_ID', 'Gain Expectancy', 'Creation Cost', 'Type', 'N. of SQL Serviced'], ");
-        return toChart.toString();
+        
+        String toChart = "";
+        for (int i = 0; i < result.size(); i++) {
+            toChart += result.get(i);
+            if (i < (result.size() - 1)) {
+                toChart += ",";
+            }
+        }
+        toChart = "['ACTION_ID', 'Gain Expectancy', 'Creation Cost', 'Type', 'N. of SQL Serviced'], " + toChart;
+        
+        log.msg("DEBUG_ACTIONS_CHART: Final chart data: " + toChart);
+        
+        return toChart;
     }
+    
+    
 
     public boolean isRunning() {
         return this.running;
