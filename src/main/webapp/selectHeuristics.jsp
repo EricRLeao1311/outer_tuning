@@ -57,16 +57,7 @@
                                     <td><%=heuristic.getStrategy()%> </td>
                                     <td><%=heuristic.getAuthor()%> </td>
                                 </tr>
-                                </p>
                                 <%}%>
-                                <!-- New Heuristic Entry -->
-                                <tr>
-                                    <td> <input type="checkbox" checked="true" name="HeuristicaIndicesDinamicos" value="true"> </td>
-                                    <td>HeuristicaIndicesDinamicos</td>
-                                    <td style="text-align: center;">1.0</td>
-                                    <td>Sugestão de Índice</td>
-                                    <td>Luciana Preciliano</td>
-                                </tr>
                             </table>
                         </center>
                         <br><br>
