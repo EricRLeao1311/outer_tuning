@@ -233,7 +233,16 @@ public final class CaptorWorkload {
     }
 
     public void saveSchemaToJson() {
-        String filePath = "schema.json";
+        // Definindo o caminho relativo onde o arquivo será salvo
+        String directoryPath = "docker-compose/tpch_workload_executor/output";
+        String filePath = directoryPath + "/schema.json";
+    
+        // Criando o diretório se ele não existir
+        File directory = new File(directoryPath);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+    
         File jsonFile = new File(filePath);
         String absolutePath = jsonFile.getAbsolutePath();
     
