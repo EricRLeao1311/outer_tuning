@@ -108,7 +108,7 @@ public final class Ontology extends Semantic {
         }
     }
 
-    public void enableHeuristc(Heuristic heuristics) {
+    public void enableHeuristic(Heuristic heuristics) {
         try {
             if (config.getProperty("disable_rules").equals("0")) {
                 log.msg("Enable: " + heuristics.getName());
