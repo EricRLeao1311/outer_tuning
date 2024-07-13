@@ -28,8 +28,6 @@ services:
       - mysql
     links:
       - mysql
-    volumes:
-      - ./docker-compose/tpch_workload_executor/output:/usr/local/tomcat/docker-compose/tpch_workload_executor/output
 
   outertuning:
     image: outertuning
@@ -40,3 +38,5 @@ services:
       - mysql
     ports:
       - 80:8080
+    volumes:
+      - "./tpch_workload_executor/output:/usr/local/tomcat/docker-compose/tpch_workload_executor/output"

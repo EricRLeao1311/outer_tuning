@@ -536,5 +536,6 @@ if __name__ == '__main__':
     dbms = str(sys.argv[2])
     explain = str(sys.argv[3])
     repetition = str(sys.argv[4])
+    print(repetition)
     execute_test_and_charts(database, dbms, explain, '', repetition)
     print('done!')
