@@ -16,7 +16,6 @@
     </properties>
 
     <dependencies>
-
         <dependency>
             <version>2.7.5</version>
             <groupId>antlr</groupId>
@@ -247,9 +246,7 @@
             <scope>provided</scope>
         </dependency>
 
-
         <!-- Local  -->
-
         <dependency>
             <version>0.0.1</version>
             <artifactId>orphanNodesAlg</artifactId>
@@ -341,7 +338,6 @@
         </dependency>
 
         <!-- Tests  -->
-
         <dependency>
             <version>1.3</version>
             <groupId>org.hamcrest</groupId>
@@ -355,7 +351,6 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <repositories>
@@ -405,6 +400,11 @@
                     <warSourceDirectory>${project.build.directory}/${project.build.finalName}/</warSourceDirectory>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.3.1</version> <!-- Atualize para a versão mais recente -->
+            </plugin>
         </plugins>
 
         <resources>
@@ -432,5 +432,4 @@
             </properties>
         </profile>
     </profiles>
-
 </project>

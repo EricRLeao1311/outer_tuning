@@ -21,6 +21,7 @@ import br.com.pucrio.inf.biobd.outertuning.ontology.Ontology;
 import org.protege.owl.portability.query.Result;
 import org.protege.owl.portability.query.ResultException;
 
+
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.List;
@@ -222,6 +223,9 @@ public class OuterTuningAgent implements Runnable {
             log.error("Erro ao criar a ação de teste específica: " + e.getMessage());
             e.printStackTrace();
         }
+        captor.verifyDatabase();  // Captura as últimas queries
+        captor.saveQueriesToJson();  // Salva as últimas queries em um arquivo JSON
+        captor.sendJsonToApi();  // Envia o esquema e as queries para a web API
     }
     
 

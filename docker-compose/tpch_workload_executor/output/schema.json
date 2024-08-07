@@ -121,64 +121,8 @@
           "order": 3
         }
       ],
-      "numberRows": 113178,
+      "numberRows": 125248,
       "numberPages": 4734976
-    },
-    {
-      "name": "time_zone_transition_type",
-      "schema": "mysql",
-      "fields": [
-        {
-          "name": "time_zone_id",
-          "primaryKey": true,
-          "uniqueKey": false,
-          "table": "time_zone_transition_type",
-          "notNull": true,
-          "type": "int",
-          "order": 1
-        },
-        {
-          "name": "transition_type_id",
-          "primaryKey": true,
-          "uniqueKey": false,
-          "table": "time_zone_transition_type",
-          "notNull": true,
-          "type": "int",
-          "order": 2
-        },
-        {
-          "name": "offset",
-          "primaryKey": false,
-          "uniqueKey": false,
-          "table": "time_zone_transition_type",
-          "notNull": true,
-          "type": "int",
-          "order": 3,
-          "domainRestriction": "0"
-        },
-        {
-          "name": "is_dst",
-          "primaryKey": false,
-          "uniqueKey": false,
-          "table": "time_zone_transition_type",
-          "notNull": true,
-          "type": "tinyint",
-          "order": 4,
-          "domainRestriction": "0"
-        },
-        {
-          "name": "abbreviation",
-          "primaryKey": false,
-          "uniqueKey": false,
-          "table": "time_zone_transition_type",
-          "notNull": true,
-          "type": "char",
-          "order": 5,
-          "domainRestriction": ""
-        }
-      ],
-      "numberRows": 10153,
-      "numberPages": 458752
     },
     {
       "name": "supplier",
@@ -252,30 +196,60 @@
       "numberPages": 2637824
     },
     {
-      "name": "help_relation",
+      "name": "time_zone_transition_type",
       "schema": "mysql",
       "fields": [
         {
-          "name": "help_topic_id",
+          "name": "time_zone_id",
           "primaryKey": true,
           "uniqueKey": false,
-          "table": "help_relation",
+          "table": "time_zone_transition_type",
           "notNull": true,
           "type": "int",
           "order": 1
         },
         {
-          "name": "help_keyword_id",
+          "name": "transition_type_id",
           "primaryKey": true,
           "uniqueKey": false,
-          "table": "help_relation",
+          "table": "time_zone_transition_type",
           "notNull": true,
           "type": "int",
           "order": 2
+        },
+        {
+          "name": "offset",
+          "primaryKey": false,
+          "uniqueKey": false,
+          "table": "time_zone_transition_type",
+          "notNull": true,
+          "type": "int",
+          "order": 3,
+          "domainRestriction": "0"
+        },
+        {
+          "name": "is_dst",
+          "primaryKey": false,
+          "uniqueKey": false,
+          "table": "time_zone_transition_type",
+          "notNull": true,
+          "type": "tinyint",
+          "order": 4,
+          "domainRestriction": "0"
+        },
+        {
+          "name": "abbreviation",
+          "primaryKey": false,
+          "uniqueKey": false,
+          "table": "time_zone_transition_type",
+          "notNull": true,
+          "type": "char",
+          "order": 5,
+          "domainRestriction": ""
         }
       ],
-      "numberRows": 1837,
-      "numberPages": 81920
+      "numberRows": 9518,
+      "numberPages": 458752
     },
     {
       "name": "time_zone_name",
@@ -300,7 +274,7 @@
           "order": 2
         }
       ],
-      "numberRows": 1637,
+      "numberRows": 2119,
       "numberPages": 262144
     },
     {
@@ -327,7 +301,33 @@
           "domainRestriction": "N"
         }
       ],
-      "numberRows": 1525,
+      "numberRows": 1815,
+      "numberPages": 81920
+    },
+    {
+      "name": "help_relation",
+      "schema": "mysql",
+      "fields": [
+        {
+          "name": "help_topic_id",
+          "primaryKey": true,
+          "uniqueKey": false,
+          "table": "help_relation",
+          "notNull": true,
+          "type": "int",
+          "order": 1
+        },
+        {
+          "name": "help_keyword_id",
+          "primaryKey": true,
+          "uniqueKey": false,
+          "table": "help_relation",
+          "notNull": true,
+          "type": "int",
+          "order": 2
+        }
+      ],
+      "numberRows": 1469,
       "numberPages": 81920
     },
     {
@@ -353,7 +353,7 @@
           "order": 2
         }
       ],
-      "numberRows": 736,
+      "numberRows": 798,
       "numberPages": 98304
     },
     {
@@ -415,7 +415,7 @@
           "order": 6
         }
       ],
-      "numberRows": 604,
+      "numberRows": 563,
       "numberPages": 1589248
     },
     {
@@ -516,7 +516,7 @@
           "domainRestriction": "N"
         }
       ],
-      "numberRows": 49,
+      "numberRows": 59,
       "numberPages": 49152
     },
     {

@@ -18,6 +18,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.IOException;
+import com.google.gson.reflect.TypeToken;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 
 
 /**
@@ -263,4 +272,66 @@ public final class CaptorWorkload {
         }
     }
 
+
+    public void saveQueriesToJson() {
+        // Definindo o caminho relativo onde o arquivo será salvo
+        String directoryPath = "docker-compose/tpch_workload_executor/output";
+        String filePath = directoryPath + "/queries.json";
+    
+        // Criando o diretório se ele não existir
+        File directory = new File(directoryPath);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+    
+        File jsonFile = new File(filePath);
+        String absolutePath = jsonFile.getAbsolutePath();
+    
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        try (FileWriter writer = new FileWriter(jsonFile)) {
+            gson.toJson(this.lastcapturedSQL, new TypeToken<ArrayList<SQL>>() {}.getType(), writer);
+            log.msg("Queries saved to JSON file: " + absolutePath);
+        } catch (IOException e) {
+            log.error("Error saving queries to JSON file: " + e.getMessage());
+        }
+    
+        // Lendo o arquivo salvo e exibindo o conteúdo no log
+        try (FileReader reader = new FileReader(jsonFile)) {
+            Object jsonContent = gson.fromJson(reader, Object.class);
+            log.msg("Conteúdo do arquivo JSON salvo: " + gson.toJson(jsonContent));
+        } catch (IOException e) {
+            log.error("Erro ao ler o arquivo JSON salvo: " + e.getMessage());
+        }
+    }
+
+    public void sendJsonToApi() {
+        try {
+            String directoryPath = "docker-compose/tpch_workload_executor/output";
+            Path schemaPath = Paths.get(directoryPath + "/schema.json");
+            Path queriesPath = Paths.get(directoryPath + "/queries.json");
+    
+            String schemaJson = new String(Files.readAllBytes(schemaPath));
+            String queriesJson = new String(Files.readAllBytes(queriesPath));
+    
+            String combinedJson = "{ \"schema\": " + schemaJson + ", \"queries\": " + queriesJson + " }";
+    
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/api/receiveData")) // Substitua pela URL da sua API
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(combinedJson))
+                    .build();
+    
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+    
+            if (response.statusCode() == 200) {
+                log.msg("JSON enviado com sucesso para a API.");
+            } else {
+                log.error("Erro ao enviar JSON para a API: " + response.body());
+            }
+        } catch (IOException | InterruptedException e) {
+            log.error("Erro ao enviar JSON para a API: " + e.getMessage());
+        }
+    }
+        
 }
