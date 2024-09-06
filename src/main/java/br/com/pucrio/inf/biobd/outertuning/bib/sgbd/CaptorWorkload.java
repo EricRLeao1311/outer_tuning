@@ -5,6 +5,8 @@
 package br.com.pucrio.inf.biobd.outertuning.bib.sgbd;
 
 import br.com.pucrio.inf.biobd.outertuning.bib.base.Log;
+import java.util.Set;
+import java.util.HashSet;
 import br.com.pucrio.inf.biobd.outertuning.bib.configuration.Configuration;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,6 +28,12 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
+
 
 
 
@@ -53,7 +61,7 @@ public final class CaptorWorkload {
         this.schema = new Schema();
         this.readSchemaDataBase();
         this.captorPlan = new CaptorPlan();
-        this.saveSchemaToJson();
+        // this.saveSchemaToJson();
     }
 
     public ConnectionSGBD getConnection() {
@@ -241,10 +249,10 @@ public final class CaptorWorkload {
         return null;
     }
 
-    public void saveSchemaToJson() {
+    public void saveSchemaAndQueriesToJson() {
         // Definindo o caminho relativo onde o arquivo será salvo
         String directoryPath = "docker-compose/tpch_workload_executor/output";
-        String filePath = directoryPath + "/schema.json";
+        String filePath = directoryPath + "/schema_and_queries.json";
     
         // Criando o diretório se ele não existir
         File directory = new File(directoryPath);
@@ -256,11 +264,70 @@ public final class CaptorWorkload {
         String absolutePath = jsonFile.getAbsolutePath();
     
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    
+        // Extrair apenas as queries SQL reais
+        List<Map<String, String>> extractedQueries = new ArrayList<>();
+        Set<String> seenQueries = new HashSet<>(); // Para armazenar queries normalizadas
+        int maxId = 0;
+
+        for (SQL sqlObject : this.lastcapturedSQL) {
+            // Normaliza a query atual
+            String normalizedCurrentQuery = sqlObject.getSql().trim().replaceAll("\\s+", " ").toLowerCase();
+            
+            // Verifica se já vimos essa query
+            if (!seenQueries.contains(normalizedCurrentQuery)) {
+                // Atualiza o máximo ID
+                maxId++;
+
+                // Cria um novo mapa para a query
+                Map<String, String> queryMap = new HashMap<>();
+                queryMap.put("id", "DML_TPCH_" + maxId);
+                queryMap.put("query", sqlObject.getSql());
+
+                // Adiciona a query normalizada ao conjunto e a query original à lista
+                seenQueries.add(normalizedCurrentQuery);
+                extractedQueries.add(queryMap);
+            }
+        }
+
+    
+        // Criando a estrutura para as colunas e tabelas
+        List<Map<String, Object>> tables = new ArrayList<>();
+        for (Table table : schema.tables) {
+            Map<String, Object> tableMap = new HashMap<>();
+            tableMap.put("id", "Table_" + table.getName().toUpperCase());
+            tableMap.put("name", table.getName());
+            tableMap.put("numberRows", table.getNumberRows());
+            
+            List<String> columnIds = new ArrayList<>();
+            for (Column column : table.getFields()) {
+                columnIds.add("Column_" + column.getName().toUpperCase());
+            }
+            tableMap.put("columns", columnIds);
+            tables.add(tableMap);
+        }
+    
+        List<Map<String, String>> columns = new ArrayList<>();
+        for (Table table : schema.tables) {
+            for (Column column : table.getFields()) {
+                Map<String, String> columnMap = new HashMap<>();
+                columnMap.put("id", "Column_" + column.getName().toUpperCase());
+                columnMap.put("name", column.getName());
+                columns.add(columnMap);
+            }
+        }
+    
+        // Criando o objeto combinado
+        Map<String, Object> combinedJson = new HashMap<>();
+        combinedJson.put("dmlStatements", extractedQueries);
+        combinedJson.put("columns", columns);
+        combinedJson.put("tables", tables);
+    
         try (FileWriter writer = new FileWriter(jsonFile)) {
-            gson.toJson(this.schema, writer);
-            log.msg("Schema saved to JSON file: " + absolutePath);
+            gson.toJson(combinedJson, writer);
+            log.msg("Schema and queries saved to JSON file: " + absolutePath);
         } catch (IOException e) {
-            log.error("Error saving schema to JSON file: " + e.getMessage());
+            log.error("Error saving schema and queries to JSON file: " + e.getMessage());
         }
     
         // Lendo o arquivo salvo e exibindo o conteúdo no log
@@ -271,59 +338,27 @@ public final class CaptorWorkload {
             log.error("Erro ao ler o arquivo JSON salvo: " + e.getMessage());
         }
     }
-
-
-    public void saveQueriesToJson() {
-        // Definindo o caminho relativo onde o arquivo será salvo
-        String directoryPath = "docker-compose/tpch_workload_executor/output";
-        String filePath = directoryPath + "/queries.json";
     
-        // Criando o diretório se ele não existir
-        File directory = new File(directoryPath);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-    
-        File jsonFile = new File(filePath);
-        String absolutePath = jsonFile.getAbsolutePath();
-    
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        try (FileWriter writer = new FileWriter(jsonFile)) {
-            gson.toJson(this.lastcapturedSQL, new TypeToken<ArrayList<SQL>>() {}.getType(), writer);
-            log.msg("Queries saved to JSON file: " + absolutePath);
-        } catch (IOException e) {
-            log.error("Error saving queries to JSON file: " + e.getMessage());
-        }
-    
-        // Lendo o arquivo salvo e exibindo o conteúdo no log
-        try (FileReader reader = new FileReader(jsonFile)) {
-            Object jsonContent = gson.fromJson(reader, Object.class);
-            log.msg("Conteúdo do arquivo JSON salvo: " + gson.toJson(jsonContent));
-        } catch (IOException e) {
-            log.error("Erro ao ler o arquivo JSON salvo: " + e.getMessage());
-        }
-    }
 
     public void sendJsonToApi() {
         try {
             String directoryPath = "docker-compose/tpch_workload_executor/output";
-            Path schemaPath = Paths.get(directoryPath + "/schema.json");
-            Path queriesPath = Paths.get(directoryPath + "/queries.json");
-    
-            String schemaJson = new String(Files.readAllBytes(schemaPath));
-            String queriesJson = new String(Files.readAllBytes(queriesPath));
-    
-            String combinedJson = "{ \"schema\": " + schemaJson + ", \"queries\": " + queriesJson + " }";
-    
+            Path jsonFilePath = Paths.get(directoryPath, "schema_and_queries.json");
+
+            String jsonContent = new String(Files.readAllBytes(jsonFilePath));
+
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8080/api/receiveData")) // Substitua pela URL da sua API
+                    .uri(URI.create("http://webapi:8080/api/receiveData"))
                     .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(combinedJson))
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonContent))
                     .build();
-    
+
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-    
+
+            // Salva o status code e o corpo da resposta em um arquivo
+            saveResponseToFile(directoryPath, response.statusCode(), response.body());
+
             if (response.statusCode() == 200) {
                 log.msg("JSON enviado com sucesso para a API.");
             } else {
@@ -333,5 +368,16 @@ public final class CaptorWorkload {
             log.error("Erro ao enviar JSON para a API: " + e.getMessage());
         }
     }
+
+    private void saveResponseToFile(String directoryPath, int statusCode, String responseBody) {
+        try {
+            String resultFilePath = directoryPath + "/result.txt";
+            String content = "Status Code: " + statusCode + "\n" + "Response Body: " + responseBody + "\n";
+            Files.write(Paths.get(resultFilePath), content.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            log.error("Erro ao salvar a resposta em um arquivo: " + e.getMessage());
+        }
+    }
+    
         
 }

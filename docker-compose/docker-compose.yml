@@ -1,5 +1,9 @@
 version: '3.1'
 
+networks:
+  mynetwork:
+    driver: bridge
+
 services:
 
   mysql:
@@ -17,6 +21,8 @@ services:
       MYSQL_DATABASE: mysql
     security_opt:
       - seccomp:unconfined
+    networks:
+      - mynetwork
 
   workload:
     image: workload-executor
@@ -26,17 +32,38 @@ services:
       dockerfile: ./Dockerfile
     depends_on:
       - mysql
+      - webapi
     links:
       - mysql
+      - webapi
+    networks:
+      - mynetwork
+
+  webapi:
+    build:
+      context: ./webapi/demo/demo
+      dockerfile: ./Dockerfile
+    restart: always
+    ports:
+      - 8080:8080
+    volumes:
+      - "./tpch_workload_executor/output:/usr/local/tomcat/docker-compose/tpch_workload_executor/output"
+    networks:
+      - mynetwork
 
   outertuning:
     image: outertuning
     restart: always
     depends_on:
       - mysql
+      - webapi
     links:
       - mysql
+      - webapi
     ports:
       - 80:8080
     volumes:
       - "./tpch_workload_executor/output:/usr/local/tomcat/docker-compose/tpch_workload_executor/output"
+    networks:
+      - mynetwork
+

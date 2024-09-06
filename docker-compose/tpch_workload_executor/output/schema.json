@@ -86,7 +86,7 @@
           "order": 9
         }
       ],
-      "numberRows": 198345,
+      "numberRows": 198137,
       "numberPages": 34144256
     },
     {
@@ -192,7 +192,7 @@
           "order": 7
         }
       ],
-      "numberRows": 9992,
+      "numberRows": 10032,
       "numberPages": 2637824
     },
     {
@@ -248,7 +248,7 @@
           "domainRestriction": ""
         }
       ],
-      "numberRows": 9518,
+      "numberRows": 9437,
       "numberPages": 458752
     },
     {
@@ -274,7 +274,7 @@
           "order": 2
         }
       ],
-      "numberRows": 2119,
+      "numberRows": 1866,
       "numberPages": 262144
     },
     {
@@ -329,32 +329,6 @@
       ],
       "numberRows": 1469,
       "numberPages": 81920
-    },
-    {
-      "name": "help_keyword",
-      "schema": "mysql",
-      "fields": [
-        {
-          "name": "help_keyword_id",
-          "primaryKey": true,
-          "uniqueKey": false,
-          "table": "help_keyword",
-          "notNull": true,
-          "type": "int",
-          "order": 1
-        },
-        {
-          "name": "name",
-          "primaryKey": false,
-          "uniqueKey": true,
-          "table": "help_keyword",
-          "notNull": true,
-          "type": "char",
-          "order": 2
-        }
-      ],
-      "numberRows": 798,
-      "numberPages": 98304
     },
     {
       "name": "help_topic",
@@ -415,8 +389,34 @@
           "order": 6
         }
       ],
-      "numberRows": 563,
+      "numberRows": 1153,
       "numberPages": 1589248
+    },
+    {
+      "name": "help_keyword",
+      "schema": "mysql",
+      "fields": [
+        {
+          "name": "help_keyword_id",
+          "primaryKey": true,
+          "uniqueKey": false,
+          "table": "help_keyword",
+          "notNull": true,
+          "type": "int",
+          "order": 1
+        },
+        {
+          "name": "name",
+          "primaryKey": false,
+          "uniqueKey": true,
+          "table": "help_keyword",
+          "notNull": true,
+          "type": "char",
+          "order": 2
+        }
+      ],
+      "numberRows": 753,
+      "numberPages": 98304
     },
     {
       "name": "partsupp",

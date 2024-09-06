@@ -21,10 +21,27 @@ import br.com.pucrio.inf.biobd.outertuning.ontology.Ontology;
 import org.protege.owl.portability.query.Result;
 import org.protege.owl.portability.query.ResultException;
 
+import java.lang.Math;
+
 
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.FileReader;
+import java.io.IOException;
+
+
+import java.util.Random;
 
 
 import static java.lang.Thread.sleep;
@@ -139,93 +156,87 @@ public class OuterTuningAgent implements Runnable {
     public void addRealisticTestActions() {
         try {
             List<ActionSF> testActions = new ArrayList<>();
-    
-            // Ação específica com base na imagem fornecida
-            ActionSF newAction = new ActionSF();
-            newAction.setId("HYP_O_CUSTKEY_O_ORDERDATE");
-            newAction.setName("Hypothetical Index on Customer Key and Order Date");
-            newAction = this.getActionFromList(newAction);
-            newAction.setCommand("CREATE INDEX HYP_O_CUSTKEY_O_ORDERDATE ON orders(o_custkey, o_orderdate)");
-            newAction.setJustify("Not yet!");
-            newAction.setHeuristic("HeuristicaIndicesDinamicos");
-            newAction.addSql(captor.getSqlCaptured("/* TPC_H Query 5 */ SELECT n_name, sum(l_extendedprice * (1 - l_discount)) as revenue FROM customer, orders, lineitem, supplier, nation, region WHERE c_custkey = o_custkey AND l_orderkey = o_orderkey AND l_suppkey = s_suppkey AND c_nationkey = s_nationkey AND s_nationkey = n_nationkey AND n_regionkey = r_regionkey AND r_name = 'MIDDLE EAST' AND o_orderdate >= date '1997-12-07' AND o_orderdate < date '1997-12-07' + interval '1' year GROUP BY n_name ORDER BY revenue desc"));
-            newAction.setStatus("suggested");
-            newAction.setBonus(0.75f);
-            newAction.setCreationCost(13.2f); 
-            newAction.setCost(0.5f);
-            newAction.setType("Index");
+            Thread.sleep(30000);
+            captor.verifyDatabase();  // Captura as últimas queries
+            captor.saveSchemaAndQueriesToJson();  // Salva as últimas queries em um arquivo JSON
+            //chama a webapi
+            try {
+                // Lê o JSON do arquivo
+                Gson gson = new Gson();
+                FileReader reader = new FileReader("docker-compose/tpch_workload_executor/output/Result.json");
+                JsonArray jsonArray = JsonParser.parseReader(reader).getAsJsonArray();
 
-            // Ação específica com base nas inferências fornecidas
-            ActionSF newAction_2 = new ActionSF();
-            newAction_2.setId("HYP_O_ORDERDATE_O_CUSTKEY");
-            newAction_2.setName("Hypothetical Index on Order Date and Customer Key");
-            newAction_2 = this.getActionFromList(newAction_2);
-            newAction_2.setCommand("CREATE INDEX HYP_O_ORDERDATE_O_CUSTKEY ON orders(o_orderdate, o_custkey)");
-            newAction_2.setJustify("Not yet!");
-            newAction_2.setHeuristic("HeuristicaIndicesDinamicos");
-            newAction_2.addSql(captor.getSqlCaptured("/* TPC_H Query 5 */ SELECT n_name, sum(l_extendedprice * (1 - l_discount)) as revenue FROM customer, orders, lineitem, supplier, nation, region WHERE c_custkey = o_custkey AND l_orderkey = o_orderkey AND l_suppkey = s_suppkey AND c_nationkey = s_nationkey AND s_nationkey = n_nationkey AND n_regionkey = r_regionkey AND r_name = 'MIDDLE EAST' AND o_orderdate >= date '1997-12-07' AND o_orderdate < date '1997-12-07' + interval '1' year GROUP BY n_name ORDER BY revenue desc"));
-            newAction_2.setStatus("suggested");
-            newAction_2.setBonus(15.6f);
-            newAction_2.setCreationCost(7.5f); 
-            newAction_2.setCost(0.5f);
-            newAction_2.setType("Index");
+                // Lê o JSON de schema_and_queries para obter o número de linhas
+                FileReader schemaReader = new FileReader("docker-compose/tpch_workload_executor/output/schema_and_queries.json");
+                JsonObject schemaJson = JsonParser.parseReader(schemaReader).getAsJsonObject();
+                JsonArray tablesArray = schemaJson.getAsJsonArray("tables");
+                Map<String, Long> tableRowsMap = new HashMap<>();
 
-            // Ação específica com base nas inferências fornecidas
-            ActionSF newAction3 = new ActionSF();
-            newAction3.setId("HYP_L_ORDERKEY_L_PARTKEY");
-            newAction3.setName("Hypothetical Index on Lineitem Order Key and Part Key");
-            newAction3 = this.getActionFromList(newAction3);
-            newAction3.setCommand("CREATE INDEX HYP_L_ORDERKEY_L_PARTKEY ON lineitem(l_orderkey, l_partkey)");
-            newAction3.setJustify("Not yet!");
-            newAction3.setHeuristic("HeuristicaIndiceHipoteticoBeneficios");
-            newAction3.addSql(captor.getSqlCaptured("/* TPC_H Query 5 */ SELECT n_name, sum(l_extendedprice * (1 - l_discount)) as revenue FROM customer, orders, lineitem, supplier, nation, region WHERE c_custkey = o_custkey AND l_orderkey = o_orderkey AND l_suppkey = s_suppkey AND c_nationkey = s_nationkey AND s_nationkey = n_nationkey AND n_regionkey = r_regionkey AND r_name = 'MIDDLE EAST' AND o_orderdate >= date '1997-12-07' AND o_orderdate < date '1997-12-07' + interval '1' year GROUP BY n_name ORDER BY revenue desc"));
-            newAction3.setStatus("suggested");
-            newAction3.setBonus(0.2f);
-            newAction3.setCreationCost(17.8f); 
-            newAction3.setCost(0.5f);
-            newAction3.setType("Index");
+                List<ActionSF> actionsList = new ArrayList<>();
 
-            // Ação específica com base nas inferências fornecidas
-            ActionSF newAction4 = new ActionSF();
-            newAction4.setId("HYP_L_COMMITDATE_L_ORDERKEY");
-            newAction4.setName("Hypothetical Index on Lineitem Commit Date and Order Key");
-            newAction4 = this.getActionFromList(newAction4);
-            newAction4.setCommand("CREATE INDEX HYP_L_COMMITDATE_L_ORDERKEY ON lineitem(l_commitdate, l_orderkey)");
-            newAction4.setJustify("Not yet!");
-            newAction4.setHeuristic("HeuristicaIndicesDinamicos");
-            newAction4.addSql(captor.getSqlCaptured("/* TPC_H Query 4 */ select o_orderpriority, count(*) as order_count from orders where o_orderdate >= date '1994-06-22' and o_orderdate < adddate('1994-06-22', interval '3' month) and exists ( select * from lineitem where l_orderkey = o_orderkey and l_commitdate < l_receiptdate ) group by o_orderpriority order by o_orderpriority"));
-            newAction4.setStatus("suggested");
-            newAction4.setBonus(0.9f);
-            newAction4.setCreationCost(22.4f); 
-            newAction4.setCost(0.5f);
-            newAction4.setType("Index");
-            // Ação específica com base nas inferências fornecidas
-            ActionSF newAction6 = new ActionSF();
-            newAction6.setId("HYP_O_ORDERKEY_O_ORDERDATE");
-            newAction6.setName("Hypothetical Index on Order Key and Order Date");
-            newAction6 = this.getActionFromList(newAction6);
-            newAction6.setCommand("CREATE INDEX HYP_O_ORDERKEY_O_ORDERDATE ON orders(o_orderkey, o_orderdate)");
-            newAction6.setJustify("Not yet!");
-            newAction6.setHeuristic("HeuristicaIndicesDinamicos");
-            newAction6.addSql(captor.getSqlCaptured("/* TPC_H Query 3 */ SELECT l_orderkey, sum(l_extendedprice * (1 - l_discount)) as revenue, o_orderdate, o_shippriority FROM customer, orders, lineitem WHERE c_mktsegment = 'HOUSEHOLD' AND c_custkey = o_custkey AND l_orderkey = o_orderkey AND o_orderdate < date '1996-09-21' AND l_shipdate > date '1993-05-16' GROUP BY l_orderkey, o_orderdate, o_shippriority ORDER BY revenue desc, o_orderdate LIMIT 20"));
-            newAction6.setStatus("suggested");
-            newAction6.setBonus(1.0f);
-            newAction6.setCreationCost(8.0f);
-            newAction6.setCost(0.5f);
-            newAction6.setType("Index");
+                // Mapeia o nome da tabela ao número de linhas
+                for (int i = 0; i < tablesArray.size(); i++) {
+                    JsonObject tableObj = tablesArray.get(i).getAsJsonObject();
+                    String tableName = tableObj.get("name").getAsString();
+                    long numberRows = tableObj.get("numberRows").getAsLong();
+                    tableRowsMap.put(tableName.toLowerCase(), numberRows);
+                    log.msg("tabela:" + tableName + "linhas: " + numberRows);
+                }
 
 
 
+                // // Itera sobre cada objeto no JSON array
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    JsonObject jsonObject = jsonArray.get(i).getAsJsonObject();
+        
+                //     // Cria uma nova ação a partir do JSON
+                    ActionSF newAction = new ActionSF();
+                    newAction.setId(jsonObject.get("id").getAsString());
+                    newAction.setName(jsonObject.get("id").getAsString());
+                    newAction = this.getActionFromList(newAction);
+                    newAction.setCommand(jsonObject.get("command").getAsString());
+                    newAction.setJustify(jsonObject.get("rule").getAsString());
+                    newAction.setHeuristic("HeuristicaIndicesDinamicos");
+                    newAction.addSql(captor.getSqlCaptured(jsonObject.get("sql").getAsString()));
+                    newAction.setStatus("suggested");
+                    newAction.setBonus(jsonObject.get("bonus").getAsFloat());
+                    
 
-    
-            log.msg("Ação de teste específica adicionada com sucesso.");
+                    String sqlCommand = jsonObject.get("command").getAsString();
+                    String tableName = extractTableName(sqlCommand);
+                    log.msg("nome da tabela: " + tableName);
+                    
+                    // Define o custo de criação com base no número de linhas da tabela
+                    Long numberOfRows = tableRowsMap.getOrDefault(tableName.toLowerCase(), 0L);
+                    newAction.setCreationCost((numberOfRows > 0) ? (float) (Math.log(numberOfRows) / Math.log(100)) : 0);
+
+
+                    newAction.setType("Index");
+                    actionsList.add(newAction);
+        
+                    // Adiciona a nova ação à lista
+                    log.msg("Ação de teste específica adicionada com sucesso: ID = " + jsonObject.get("id").getAsString()
+                    + ", Name = " + jsonObject.get("id").getAsString()
+                    + ", Command = " + jsonObject.get("command").getAsString()
+                    + ", Justify = " + jsonObject.get("rule").getAsString()
+                    + ", Heuristic = " + newAction.getHeuristic()
+                    + ", SQL = " + jsonObject.get("sql").getAsString()
+                    // + ", Status = " + newAction.getStatus()
+                    // + ", Type = " + newAction.getType()
+                    );
+                }
+        
+                reader.close();
+            } catch (IOException e) {
+                log.error("Erro ao ler o arquivo JSON: " + e.getMessage());
+            } catch (Exception e) {
+                log.error("Erro ao criar as ações de teste específicas: " + e.getMessage());
+                e.printStackTrace();
+            }
         } catch (Exception e) {
             log.error("Erro ao criar a ação de teste específica: " + e.getMessage());
             e.printStackTrace();
         }
-        captor.verifyDatabase();  // Captura as últimas queries
-        captor.saveQueriesToJson();  // Salva as últimas queries em um arquivo JSON
-        captor.sendJsonToApi();  // Envia o esquema e as queries para a web API
     }
     
 
@@ -350,5 +361,17 @@ public class OuterTuningAgent implements Runnable {
         }
         this.actionsSF.add(action);
         return action;
+    }
+
+    public String extractTableName(String sqlCommand) {
+        String regex = "on\\s+([\\w.]+)\\s*\\(";
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(sqlCommand);
+    
+        if (matcher.find()) {
+            return matcher.group(1);  // Retorna o que está entre "ON" e "("
+        } else {
+            return "";
+        }
     }
 }

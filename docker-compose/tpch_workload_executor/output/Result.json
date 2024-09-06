@@ -1,0 +1,198 @@
+[
+  {
+    "bonus": "0.4",
+    "rule": "RuleHypSimpleIndex",
+    "id": "HYP_L_SHIPDATE",
+    "command": "CREATE INDEX HYP_L_SHIPDATE ON lineitem(L_SHIPDATE)",
+    "sql": "/* TPC_H Query 3 */ SELECT l_orderkey, sum(l_extendedprice * (1 - l_discount)) as revenue, o_orderdate, o_shippriority FROM customer, orders, lineitem WHERE c_mktsegment = 'HOUSEHOLD' AND c_custkey = o_custkey AND l_orderkey = o_orderkey AND o_orderdate < date '1996-09-21' AND l_shipdate > date '1993-05-16' GROUP BY l_orderkey, o_orderdate, o_shippriority ORDER BY revenue desc, o_orderdate LIMIT 20"
+  },
+  {
+    "bonus": "0.333333333333333333333333",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_C_CUSTKEY_C_MKTSEGMENT",
+    "command": "CREATE INDEX HYP_C_CUSTKEY_C_MKTSEGMENT ON customer(C_MKTSEGMENT, C_CUSTKEY)",
+    "sql": "/* TPC_H Query 3 */ SELECT l_orderkey, sum(l_extendedprice * (1 - l_discount)) as revenue, o_orderdate, o_shippriority FROM customer, orders, lineitem WHERE c_mktsegment = 'HOUSEHOLD' AND c_custkey = o_custkey AND l_orderkey = o_orderkey AND o_orderdate < date '1996-09-21' AND l_shipdate > date '1993-05-16' GROUP BY l_orderkey, o_orderdate, o_shippriority ORDER BY revenue desc, o_orderdate LIMIT 20"
+  },
+  {
+    "bonus": "0.2",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_L_RECEIPTDATE_L_COMMITDATE",
+    "command": "CREATE INDEX HYP_L_RECEIPTDATE_L_COMMITDATE ON lineitem(L_COMMITDATE, L_RECEIPTDATE)",
+    "sql": "/* TPC_H Query 4 */ select o_orderpriority, count(*) as order_count from orders where o_orderdate >= date '1994-06-22' and o_orderdate < adddate('1994-06-22', interval '3' month) and exists ( select * from lineitem where l_orderkey = o_orderkey and l_commitdate < l_receiptdate ) group by o_orderpriority order by o_orderpriority"
+  },
+  {
+    "bonus": "1.0",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_R_NAME_R_REGIONKEY",
+    "command": "CREATE INDEX HYP_R_NAME_R_REGIONKEY ON region(R_REGIONKEY, R_NAME)",
+    "sql": "/* TPC_H Query 5 */ SELECT n_name, sum(l_extendedprice * (1 - l_discount)) as revenue FROM customer, orders, lineitem, supplier, nation, region WHERE c_custkey = o_custkey AND l_orderkey = o_orderkey AND l_suppkey = s_suppkey AND c_nationkey = s_nationkey AND s_nationkey = n_nationkey AND n_regionkey = r_regionkey AND r_name = 'MIDDLE EAST' AND o_orderdate >= date '1997-12-07' AND o_orderdate < date '1997-12-07' + interval '1' year GROUP BY n_name ORDER BY revenue desc"
+  },
+  {
+    "bonus": "0.2",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_L_ORDERKEY_L_RECEIPTDATE",
+    "command": "CREATE INDEX HYP_L_ORDERKEY_L_RECEIPTDATE ON lineitem(L_RECEIPTDATE, L_ORDERKEY)",
+    "sql": "/* TPC_H Query 4 */ select o_orderpriority, count(*) as order_count from orders where o_orderdate >= date '1994-06-22' and o_orderdate < adddate('1994-06-22', interval '3' month) and exists ( select * from lineitem where l_orderkey = o_orderkey and l_commitdate < l_receiptdate ) group by o_orderpriority order by o_orderpriority"
+  },
+  {
+    "bonus": "0.2",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_L_ORDERKEY_L_SHIPDATE",
+    "command": "CREATE INDEX HYP_L_ORDERKEY_L_SHIPDATE ON lineitem(L_SHIPDATE, L_ORDERKEY)",
+    "sql": "/* TPC_H Query 3 */ SELECT l_orderkey, sum(l_extendedprice * (1 - l_discount)) as revenue, o_orderdate, o_shippriority FROM customer, orders, lineitem WHERE c_mktsegment = 'HOUSEHOLD' AND c_custkey = o_custkey AND l_orderkey = o_orderkey AND o_orderdate < date '1996-09-21' AND l_shipdate > date '1993-05-16' GROUP BY l_orderkey, o_orderdate, o_shippriority ORDER BY revenue desc, o_orderdate LIMIT 20"
+  },
+  {
+    "bonus": "0.2",
+    "rule": "RuleHypSimpleIndex",
+    "id": "HYP_L_RECEIPTDATE",
+    "command": "CREATE INDEX HYP_L_RECEIPTDATE ON lineitem(L_RECEIPTDATE)",
+    "sql": "/* TPC_H Query 4 */ select o_orderpriority, count(*) as order_count from orders where o_orderdate >= date '1994-06-22' and o_orderdate < adddate('1994-06-22', interval '3' month) and exists ( select * from lineitem where l_orderkey = o_orderkey and l_commitdate < l_receiptdate ) group by o_orderpriority order by o_orderpriority"
+  },
+  {
+    "bonus": "1.0",
+    "rule": "RuleHypSimpleIndex",
+    "id": "HYP_R_NAME",
+    "command": "CREATE INDEX HYP_R_NAME ON region(R_NAME)",
+    "sql": "/* TPC_H Query 5 */ SELECT n_name, sum(l_extendedprice * (1 - l_discount)) as revenue FROM customer, orders, lineitem, supplier, nation, region WHERE c_custkey = o_custkey AND l_orderkey = o_orderkey AND l_suppkey = s_suppkey AND c_nationkey = s_nationkey AND s_nationkey = n_nationkey AND n_regionkey = r_regionkey AND r_name = 'MIDDLE EAST' AND o_orderdate >= date '1997-12-07' AND o_orderdate < date '1997-12-07' + interval '1' year GROUP BY n_name ORDER BY revenue desc"
+  },
+  {
+    "bonus": "0.75",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_O_CUSTKEY_O_ORDERKEY",
+    "command": "CREATE INDEX HYP_O_CUSTKEY_O_ORDERKEY ON orders(O_ORDERKEY, O_CUSTKEY)",
+    "sql": "/* TPC_H Query 5 */ SELECT n_name, sum(l_extendedprice * (1 - l_discount)) as revenue FROM customer, orders, lineitem, supplier, nation, region WHERE c_custkey = o_custkey AND l_orderkey = o_orderkey AND l_suppkey = s_suppkey AND c_nationkey = s_nationkey AND s_nationkey = n_nationkey AND n_regionkey = r_regionkey AND r_name = 'MIDDLE EAST' AND o_orderdate >= date '1997-12-07' AND o_orderdate < date '1997-12-07' + interval '1' year GROUP BY n_name ORDER BY revenue desc"
+  },
+  {
+    "bonus": "0.4",
+    "rule": "RuleHypSimpleIndex",
+    "id": "HYP_L_SUPPKEY",
+    "command": "CREATE INDEX HYP_L_SUPPKEY ON lineitem(L_SUPPKEY)",
+    "sql": "/* TPC_H Query 5 */ SELECT n_name, sum(l_extendedprice * (1 - l_discount)) as revenue FROM customer, orders, lineitem, supplier, nation, region WHERE c_custkey = o_custkey AND l_orderkey = o_orderkey AND l_suppkey = s_suppkey AND c_nationkey = s_nationkey AND s_nationkey = n_nationkey AND n_regionkey = r_regionkey AND r_name = 'MIDDLE EAST' AND o_orderdate >= date '1997-12-07' AND o_orderdate < date '1997-12-07' + interval '1' year GROUP BY n_name ORDER BY revenue desc"
+  },
+  {
+    "bonus": "1.0",
+    "rule": "RuleHypSimpleIndex",
+    "id": "HYP_O_ORDERDATE",
+    "command": "CREATE INDEX HYP_O_ORDERDATE ON orders(O_ORDERDATE)",
+    "sql": "/* TPC_H Query 4 */ select o_orderpriority, count(*) as order_count from orders where o_orderdate >= date '1994-06-22' and o_orderdate < adddate('1994-06-22', interval '3' month) and exists ( select * from lineitem where l_orderkey = o_orderkey and l_commitdate < l_receiptdate ) group by o_orderpriority order by o_orderpriority"
+  },
+  {
+    "bonus": "0.75",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_O_CUSTKEY_O_ORDERDATE",
+    "command": "CREATE INDEX HYP_O_CUSTKEY_O_ORDERDATE ON orders(o_custkey, o_orderdate)",
+    "sql": "/* TPC_H Query 3 */ SELECT l_orderkey, sum(l_extendedprice * (1 - l_discount)) as revenue, o_orderdate, o_shippriority FROM customer, orders, lineitem WHERE c_mktsegment = 'HOUSEHOLD' AND c_custkey = o_custkey AND l_orderkey = o_orderkey AND o_orderdate < date '1996-09-21' AND l_shipdate > date '1993-05-16' GROUP BY l_orderkey, o_orderdate, o_shippriority ORDER BY revenue desc, o_orderdate LIMIT 20"
+  },
+  {
+    "bonus": "0.75",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_O_ORDERDATE_O_CUSTKEY",
+    "command": "CREATE INDEX HYP_O_ORDERDATE_O_CUSTKEY ON orders(o_orderdate, o_custkey)",
+    "sql": "/* TPC_H Query 3 */ SELECT l_orderkey, sum(l_extendedprice * (1 - l_discount)) as revenue, o_orderdate, o_shippriority FROM customer, orders, lineitem WHERE c_mktsegment = 'HOUSEHOLD' AND c_custkey = o_custkey AND l_orderkey = o_orderkey AND o_orderdate < date '1996-09-21' AND l_shipdate > date '1993-05-16' GROUP BY l_orderkey, o_orderdate, o_shippriority ORDER BY revenue desc, o_orderdate LIMIT 20"
+  },
+  {
+    "bonus": "0.5",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_S_SUPPKEY_S_NATIONKEY",
+    "command": "CREATE INDEX HYP_S_SUPPKEY_S_NATIONKEY ON supplier(S_NATIONKEY, S_SUPPKEY)",
+    "sql": "/* TPC_H Query 5 */ SELECT n_name, sum(l_extendedprice * (1 - l_discount)) as revenue FROM customer, orders, lineitem, supplier, nation, region WHERE c_custkey = o_custkey AND l_orderkey = o_orderkey AND l_suppkey = s_suppkey AND c_nationkey = s_nationkey AND s_nationkey = n_nationkey AND n_regionkey = r_regionkey AND r_name = 'MIDDLE EAST' AND o_orderdate >= date '1997-12-07' AND o_orderdate < date '1997-12-07' + interval '1' year GROUP BY n_name ORDER BY revenue desc"
+  },
+  {
+    "bonus": "1.0",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_O_ORDERKEY_O_ORDERDATE",
+    "command": "CREATE INDEX HYP_O_ORDERKEY_O_ORDERDATE ON orders(O_ORDERDATE, O_ORDERKEY)",
+    "sql": "/* TPC_H Query 5 */ SELECT n_name, sum(l_extendedprice * (1 - l_discount)) as revenue FROM customer, orders, lineitem, supplier, nation, region WHERE c_custkey = o_custkey AND l_orderkey = o_orderkey AND l_suppkey = s_suppkey AND c_nationkey = s_nationkey AND s_nationkey = n_nationkey AND n_regionkey = r_regionkey AND r_name = 'MIDDLE EAST' AND o_orderdate >= date '1997-12-07' AND o_orderdate < date '1997-12-07' + interval '1' year GROUP BY n_name ORDER BY revenue desc"
+  },
+  {
+    "bonus": "0.2",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_L_SHIPDATE_L_ORDERKEY",
+    "command": "CREATE INDEX HYP_L_SHIPDATE_L_ORDERKEY ON lineitem(L_ORDERKEY, L_SHIPDATE)",
+    "sql": "/* TPC_H Query 3 */ SELECT l_orderkey, sum(l_extendedprice * (1 - l_discount)) as revenue, o_orderdate, o_shippriority FROM customer, orders, lineitem WHERE c_mktsegment = 'HOUSEHOLD' AND c_custkey = o_custkey AND l_orderkey = o_orderkey AND o_orderdate < date '1996-09-21' AND l_shipdate > date '1993-05-16' GROUP BY l_orderkey, o_orderdate, o_shippriority ORDER BY revenue desc, o_orderdate LIMIT 20"
+  },
+  {
+    "bonus": "0.2",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_L_RECEIPTDATE_L_ORDERKEY",
+    "command": "CREATE INDEX HYP_L_RECEIPTDATE_L_ORDERKEY ON lineitem(L_ORDERKEY, L_RECEIPTDATE)",
+    "sql": "/* TPC_H Query 4 */ select o_orderpriority, count(*) as order_count from orders where o_orderdate >= date '1994-06-22' and o_orderdate < adddate('1994-06-22', interval '3' month) and exists ( select * from lineitem where l_orderkey = o_orderkey and l_commitdate < l_receiptdate ) group by o_orderpriority order by o_orderpriority"
+  },
+  {
+    "bonus": "1.0",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_O_ORDERDATE_O_ORDERKEY",
+    "command": "CREATE INDEX HYP_O_ORDERDATE_O_ORDERKEY ON orders(O_ORDERDATE, O_ORDERKEY)",
+    "sql": "/* TPC_H Query 3 */ SELECT l_orderkey, sum(l_extendedprice * (1 - l_discount)) as revenue, o_orderdate, o_shippriority FROM customer, orders, lineitem WHERE c_mktsegment = 'HOUSEHOLD' AND c_custkey = o_custkey AND l_orderkey = o_orderkey AND o_orderdate < date '1996-09-21' AND l_shipdate > date '1993-05-16' GROUP BY l_orderkey, o_orderdate, o_shippriority ORDER BY revenue desc, o_orderdate LIMIT 20"
+  },
+  {
+    "bonus": "1.0",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_R_REGIONKEY_R_NAME",
+    "command": "CREATE INDEX HYP_R_REGIONKEY_R_NAME ON region(R_REGIONKEY, R_NAME)",
+    "sql": "DML_TPCH_8"
+  },
+  {
+    "bonus": "0.333333333333333333333333",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_C_MKTSEGMENT_C_CUSTKEY",
+    "command": "CREATE INDEX HYP_C_MKTSEGMENT_C_CUSTKEY ON customer(C_CUSTKEY, C_MKTSEGMENT)",
+    "sql": "/* TPC_H Query 3 */ SELECT l_orderkey, sum(l_extendedprice * (1 - l_discount)) as revenue, o_orderdate, o_shippriority FROM customer, orders, lineitem WHERE c_mktsegment = 'HOUSEHOLD' AND c_custkey = o_custkey AND l_orderkey = o_orderkey AND o_orderdate < date '1996-09-21' AND l_shipdate > date '1993-05-16' GROUP BY l_orderkey, o_orderdate, o_shippriority ORDER BY revenue desc, o_orderdate LIMIT 20"
+  },
+  {
+    "bonus": "0.2",
+    "rule": "RuleHypSimpleIndex",
+    "id": "HYP_L_COMMITDATE",
+    "command": "CREATE INDEX HYP_L_COMMITDATE ON lineitem(L_COMMITDATE)",
+    "sql": "/* TPC_H Query 4 */ select o_orderpriority, count(*) as order_count from orders where o_orderdate >= date '1994-06-22' and o_orderdate < adddate('1994-06-22', interval '3' month) and exists ( select * from lineitem where l_orderkey = o_orderkey and l_commitdate < l_receiptdate ) group by o_orderpriority order by o_orderpriority"
+  },
+  {
+    "bonus": "0.75",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_O_ORDERKEY_O_CUSTKEY",
+    "command": "CREATE INDEX HYP_O_ORDERKEY_O_CUSTKEY ON orders(O_CUSTKEY, O_ORDERKEY)",
+    "sql": "/* TPC_H Query 5 */ SELECT n_name, sum(l_extendedprice * (1 - l_discount)) as revenue FROM customer, orders, lineitem, supplier, nation, region WHERE c_custkey = o_custkey AND l_orderkey = o_orderkey AND l_suppkey = s_suppkey AND c_nationkey = s_nationkey AND s_nationkey = n_nationkey AND n_regionkey = r_regionkey AND r_name = 'MIDDLE EAST' AND o_orderdate >= date '1997-12-07' AND o_orderdate < date '1997-12-07' + interval '1' year GROUP BY n_name ORDER BY revenue desc"
+  },
+  {
+    "bonus": "0.2",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_L_COMMITDATE_L_RECEIPTDATE",
+    "command": "CREATE INDEX HYP_L_COMMITDATE_L_RECEIPTDATE ON lineitem(L_RECEIPTDATE, L_COMMITDATE)",
+    "sql": "/* TPC_H Query 4 */ select o_orderpriority, count(*) as order_count from orders where o_orderdate >= date '1994-06-22' and o_orderdate < adddate('1994-06-22', interval '3' month) and exists ( select * from lineitem where l_orderkey = o_orderkey and l_commitdate < l_receiptdate ) group by o_orderpriority order by o_orderpriority"
+  },
+  {
+    "bonus": "0.4",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_L_ORDERKEY_L_SUPPKEY",
+    "command": "CREATE INDEX HYP_L_ORDERKEY_L_SUPPKEY ON lineitem(L_ORDERKEY, L_SUPPKEY)",
+    "sql": "/* TPC_H Query 5 */ SELECT n_name, sum(l_extendedprice * (1 - l_discount)) as revenue FROM customer, orders, lineitem, supplier, nation, region WHERE c_custkey = o_custkey AND l_orderkey = o_orderkey AND l_suppkey = s_suppkey AND c_nationkey = s_nationkey AND s_nationkey = n_nationkey AND n_regionkey = r_regionkey AND r_name = 'MIDDLE EAST' AND o_orderdate >= date '1997-12-07' AND o_orderdate < date '1997-12-07' + interval '1' year GROUP BY n_name ORDER BY revenue desc"
+  },
+  {
+    "bonus": "0.2",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_L_ORDERKEY_L_COMMITDATE",
+    "command": "CREATE INDEX HYP_L_ORDERKEY_L_COMMITDATE ON lineitem(L_COMMITDATE, L_ORDERKEY)",
+    "sql": "/* TPC_H Query 4 */ select o_orderpriority, count(*) as order_count from orders where o_orderdate >= date '1994-06-22' and o_orderdate < adddate('1994-06-22', interval '3' month) and exists ( select * from lineitem where l_orderkey = o_orderkey and l_commitdate < l_receiptdate ) group by o_orderpriority order by o_orderpriority"
+  },
+  {
+    "bonus": "0.5",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_S_NATIONKEY_S_SUPPKEY",
+    "command": "CREATE INDEX HYP_S_NATIONKEY_S_SUPPKEY ON supplier(S_SUPPKEY, S_NATIONKEY)",
+    "sql": "/* TPC_H Query 5 */ SELECT n_name, sum(l_extendedprice * (1 - l_discount)) as revenue FROM customer, orders, lineitem, supplier, nation, region WHERE c_custkey = o_custkey AND l_orderkey = o_orderkey AND l_suppkey = s_suppkey AND c_nationkey = s_nationkey AND s_nationkey = n_nationkey AND n_regionkey = r_regionkey AND r_name = 'MIDDLE EAST' AND o_orderdate >= date '1997-12-07' AND o_orderdate < date '1997-12-07' + interval '1' year GROUP BY n_name ORDER BY revenue desc"
+  },
+  {
+    "bonus": "0.2",
+    "rule": "RuleHypCompositeIndex",
+    "id": "HYP_L_COMMITDATE_L_ORDERKEY",
+    "command": "CREATE INDEX HYP_L_COMMITDATE_L_ORDERKEY ON lineitem(L_ORDERKEY, L_COMMITDATE)",
+    "sql": "/* TPC_H Query 4 */ select o_orderpriority, count(*) as order_count from orders where o_orderdate >= date '1994-06-22' and o_orderdate < adddate('1994-06-22', interval '3' month) and exists ( select * from lineitem where l_orderkey = o_orderkey and l_commitdate < l_receiptdate ) group by o_orderpriority order by o_orderpriority"
+  },
+  {
+    "bonus": "0.333333333333333333333333",
+    "rule": "RuleHypSimpleIndex",
+    "id": "HYP_C_MKTSEGMENT",
+    "command": "CREATE INDEX HYP_C_MKTSEGMENT ON customer(C_MKTSEGMENT)",
+    "sql": "/* TPC_H Query 3 */ SELECT l_orderkey, sum(l_extendedprice * (1 - l_discount)) as revenue, o_orderdate, o_shippriority FROM customer, orders, lineitem WHERE c_mktsegment = 'HOUSEHOLD' AND c_custkey = o_custkey AND l_orderkey = o_orderkey AND o_orderdate < date '1996-09-21' AND l_shipdate > date '1993-05-16' GROUP BY l_orderkey, o_orderdate, o_shippriority ORDER BY revenue desc, o_orderdate LIMIT 20"
+  }
+]
