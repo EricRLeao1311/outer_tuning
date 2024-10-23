@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Arrays;
+
 
 
 import com.google.gson.Gson;
@@ -58,6 +60,10 @@ public class OuterTuningAgent implements Runnable {
     public Class classDispatcherDebug;
     public Source sourceDebug;
     private CopyOnWriteArrayList<ActionSF> actionsSF;
+    private boolean isLucianaHeuristicSelected = false;
+    private boolean isVisaoMaterializadaHeuristicSelected = false;
+    private boolean isIndiceCompletoHeuristicSelected = false;
+    private boolean isIndiceParcialHeuristicSelected = false;
 
     public OuterTuningAgent(Configuration config) {
         this.selectedHeuristics = new CopyOnWriteArrayList<>();
@@ -80,22 +86,54 @@ public class OuterTuningAgent implements Runnable {
         log.msg("Iniciando o agente de tuning.");
         this.running = true;
         this.enableAllHeuristics();
-        boolean isLucianaHeuristicSelected = false;
         // Verificar se a heurística de Luciana está selecionada    
         for (Heuristic selectedHeuristic : selectedHeuristics) {
+
+            log.msg("Heurística selecionada: " + selectedHeuristic.getName());
             if (selectedHeuristic.getName().equals("HeuristicaIndicesDinamicos")) {
                 isLucianaHeuristicSelected = true;
-                break;
+            }
+
+            if (selectedHeuristic.getName().equals("HeuristicaVisaoMaterializada")) {
+                isVisaoMaterializadaHeuristicSelected = true;
+            }
+            if (selectedHeuristic.getName().equals("HeuristicaIndiceCompleto")) {
+                isIndiceCompletoHeuristicSelected = true;
+            }
+
+            if (selectedHeuristic.getName().equals("HeuristicaIndiceParcial")) {
+                isIndiceParcialHeuristicSelected = true;
             }
         }
-    
+
+        //Log
         if (isLucianaHeuristicSelected) {
             log.msg("Heurística de Luciana (HeuristicaIndicesDinamicos) está selecionada.");
         } else {
             log.msg("Heurística de Luciana (HeuristicaIndicesDinamicos) não está selecionada.");
         }
+
+        if (isVisaoMaterializadaHeuristicSelected) {
+            log.msg("Heurística de Visão Materializada (Heuristica Visao Materializada) está selecionada.");
+        } else {
+            log.msg("Heurística de Visão Materializada (Heuristica Visao Materializada) não está selecionada.");
+        }
+
+        if (isIndiceCompletoHeuristicSelected) {
+            log.msg("Heurística de Índice Completo (Heuristica Indice Completo) está selecionada.");
+        } else {
+            log.msg("Heurística de Índice Completo (Heuristica Indice Completo) não está selecionada.");
+        }
+
+        if (isIndiceParcialHeuristicSelected) {
+            log.msg("Heurística de Índice Parcial (Heuristica Indice Parcial) está selecionada.");
+        } else {
+            log.msg("Heurística de Índice Parcial (Heuristica Indice Parcial) não está selecionada.");
+        }
         
         while (this.running) {
+
+
             try {
                 captor.verifyDatabase();
                 if (isLucianaHeuristicSelected) {
@@ -198,9 +236,9 @@ public class OuterTuningAgent implements Runnable {
                     newAction.setJustify(jsonObject.get("rule").getAsString());
                     newAction.setHeuristic("HeuristicaIndicesDinamicos");
                     newAction.addSql(captor.getSqlCaptured(jsonObject.get("sql").getAsString()));
-                    newAction.setStatus("suggested");
+                    // newAction.setStatus("suggested");
                     newAction.setBonus(jsonObject.get("bonus").getAsFloat());
-                    
+                    newAction.setStatus("suggested");
 
                     String sqlCommand = jsonObject.get("command").getAsString();
                     String tableName = extractTableName(sqlCommand);
@@ -210,8 +248,22 @@ public class OuterTuningAgent implements Runnable {
                     Long numberOfRows = tableRowsMap.getOrDefault(tableName.toLowerCase(), 0L);
                     newAction.setCreationCost((numberOfRows > 0) ? (float) (Math.log(numberOfRows) / Math.log(100)) : 0);
 
-
-                    newAction.setType("Index");
+                    String rule = jsonObject.get("rule").getAsString();
+                    if (rule.equals("RuleHypSimpleIndex") && isIndiceCompletoHeuristicSelected) {
+                        newAction.setType("Simple Index");
+                    } 
+                    else if (rule.equals("RuleHypMaterializedView") && isVisaoMaterializadaHeuristicSelected) {
+                        newAction.setType("Materialized View");
+                    } 
+                    else if (rule.equals("RuleHypCompositeIndex") && isIndiceParcialHeuristicSelected) {
+                        newAction.setType("Composite Index");
+                    }
+                    else if (rule.equals("RuleHypPartialIndex") && isIndiceParcialHeuristicSelected) {
+                        newAction.setType("Partial Index");
+                    }
+                    else {
+                        continue; 
+                    }
                     actionsList.add(newAction);
         
                     // Adiciona a nova ação à lista
@@ -222,7 +274,7 @@ public class OuterTuningAgent implements Runnable {
                     + ", Heuristic = " + newAction.getHeuristic()
                     + ", SQL = " + jsonObject.get("sql").getAsString()
                     // + ", Status = " + newAction.getStatus()
-                    // + ", Type = " + newAction.getType()
+                    + ", Type = " + newAction.getType()
                     );
                 }
         
@@ -274,7 +326,8 @@ public class OuterTuningAgent implements Runnable {
 
     private void enableAllHeuristics() {
         for (Heuristic selectedHeuristic : selectedHeuristics) {
-            if (!selectedHeuristic.getName().equals("HeuristicaIndicesDinamicos")) {
+            String[] excludedHeuristics = {"HeuristicaIndicesDinamicos", "HeuristicaIndiceCompleto", "HeuristicaIndiceParcial", "HeuristicaVisaoMaterializada"};
+            if (!Arrays.asList(excludedHeuristics).contains(selectedHeuristic.getName())) {
                 this.ontology.enableHeuristic(selectedHeuristic);
             }
         }

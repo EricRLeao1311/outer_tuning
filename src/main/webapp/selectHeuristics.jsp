@@ -36,6 +36,9 @@
                 </div>
                 <div class="col-md-12 text-left">
                     <form action="ServletAgents?cmd=workload" id="startTuningAgent" method="POST">
+                        <!-- Hidden input for HeuristicaIndicesDinamicos -->
+                        <input type="hidden" name="HeuristicaIndicesDinamicos" value="true">
+
                         <input hidden="true" type="checkbox" name="mode_automatic" id="mode_automatic" value="mode_automatic">
                         <input hidden="true" type="checkbox" name="mode_semi_automatic" id="mode_semi_automatic" value="mode_semi_automatic">
                         <center>
@@ -48,16 +51,32 @@
                                     <th style="width: 300px; text-align: center;">Author</th>
                                 </tr>
 
-                                <% ArrayList<Heuristic> heuristics = (ArrayList<Heuristic>) request.getAttribute("heuristicList");
-                                    for (Heuristic heuristic : heuristics) {%>
+                                <% 
+                                ArrayList<Heuristic> heuristics = (ArrayList<Heuristic>) request.getAttribute("heuristicList");
+                                String[] allowedHeuristics = {"HeuristicaIndiceCompleto", "HeuristicaIndiceParcial", "HeuristicaVisaoMaterializada"};
+                                
+                                for (Heuristic heuristic : heuristics) {
+                                    String heuristicName = heuristic.getName();
+                                    boolean isAllowed = java.util.Arrays.asList(allowedHeuristics).contains(heuristicName);
+                                    if (isAllowed) { 
+                                %>
                                 <tr>
-                                    <td> <input type = "checkbox" checked="true" name = "<%=heuristic.getName()%>" value = "true"> </td>
-                                    <td><%=heuristic.getName()%> </td>
-                                    <td style="text-align: center;"><%=heuristic.getVersion()%> </td>
-                                    <td><%=heuristic.getStrategy()%> </td>
-                                    <td><%=heuristic.getAuthor()%> </td>
+                                    <td>
+                                        <% if ("HeuristicaVisaoMaterializada".equals(heuristicName)) { %>
+                                            <input type="checkbox" name="<%= heuristicName %>" value="true" disabled>
+                                        <% } else { %>
+                                            <input type="checkbox" name="<%= heuristicName %>" value="true">
+                                        <% } %>
+                                    </td>
+                                    <td><%= heuristicName %> </td>
+                                    <td style="text-align: center;"><%= heuristic.getVersion() %> </td>
+                                    <td><%= heuristic.getStrategy() %> </td>
+                                    <td><%= heuristic.getAuthor() %> </td>
                                 </tr>
-                                <%}%>
+                                <% 
+                                    } // End if allowed
+                                } // End for loop
+                                %>
                             </table>
                         </center>
                         <br><br>

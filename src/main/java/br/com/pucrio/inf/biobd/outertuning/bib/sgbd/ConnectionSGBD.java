@@ -14,6 +14,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.TimeUnit;
+
 
 public class ConnectionSGBD {
 
@@ -31,6 +33,14 @@ public class ConnectionSGBD {
     private void connect() {
         try {
             if (connection == null) {
+                // // Esperar 30 segundos após a conexão
+                // try {
+                //     log.msg("Esperando 30 segundos...");
+                //     TimeUnit.SECONDS.sleep(30);
+                // } catch (InterruptedException e) {
+                //     log.error(e);
+                //     Thread.currentThread().interrupt();
+                // }
                 switch (config.getProperty("sgbd")) {
                     case "sqlserver":
                         connection = DriverManager.getConnection(config.getProperty("urlSGBD") + "databaseName=" + config.getProperty("databaseName") + ";", config.getProperty("userSGBD"), config.getProperty("pwdSGBD"));

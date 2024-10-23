@@ -194,5 +194,12 @@
     "id": "HYP_C_MKTSEGMENT",
     "command": "CREATE INDEX HYP_C_MKTSEGMENT ON customer(C_MKTSEGMENT)",
     "sql": "/* TPC_H Query 3 */ SELECT l_orderkey, sum(l_extendedprice * (1 - l_discount)) as revenue, o_orderdate, o_shippriority FROM customer, orders, lineitem WHERE c_mktsegment = 'HOUSEHOLD' AND c_custkey = o_custkey AND l_orderkey = o_orderkey AND o_orderdate < date '1996-09-21' AND l_shipdate > date '1993-05-16' GROUP BY l_orderkey, o_orderdate, o_shippriority ORDER BY revenue desc, o_orderdate LIMIT 20"
+  },
+  {
+    "bonus": "0.4",
+    "rule": "RuleSimplePartialIndex",
+    "id": "PARTIAL_O_ORDERDATE_5ed359b830f647fe43352c7d37a017c1",
+    "command": "CREATE INDEX PARTIAL_O_ORDERDATE_5ed359b830f647fe43352c7d37a017c1 ON orders(Column_O_ORDERDATE) WHERE  >= DATE '1994-06-22'",
+    "sql": "/* TPC_H Query 4 */ select o_orderpriority, count(*) as order_count from orders where o_orderdate >= date '1994-06-22' and o_orderdate < adddate('1994-06-22', interval '3' month) and exists ( select * from lineitem where l_orderkey = o_orderkey and l_commitdate < l_receiptdate ) group by o_orderpriority order by o_orderpriority"
   }
 ]

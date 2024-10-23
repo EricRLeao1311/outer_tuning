@@ -16,11 +16,16 @@
                     <li><a href="ServletAgents?cmd=workload">Workload</a></li>
                     <li><a href="ServletAgents?cmd=tuningActions">Tuning actions</a></li>
                     <li><a href="ServletAgents?cmd=documentation">Documentation</a></li>
+                    <!-- Botão de Stop Process -->
+                    <li>
+                        <form action="stopProcess" method="post" style="display:inline;">
+                            <button type="submit" class="btn-link" style="padding: 0; border: none; background: none; font-size: 16px; color: #333; text-decoration: none;">Stop Process</button>
+                        </form>
+                    </li>
                 </ul>
             </div>
         </div>
-        <div class="clear">
-        </div>
+        <div class="clear"></div>
         <!-- End Top Menu -->
     </div>
 </div>

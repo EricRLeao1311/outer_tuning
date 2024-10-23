@@ -168,6 +168,27 @@ public class CoordenatorAgent {
         lucianaHeuristic.setStrategy("Sugestão de Índice");
         lucianaHeuristic.setAuthor("Luciana Perciliano");
         heuristics.add(lucianaHeuristic);
+
+        Heuristic indiceCompleto = new Heuristic();
+        indiceCompleto.setName("HeuristicaIndiceCompleto");
+        indiceCompleto.setVersion("1.0");
+        indiceCompleto.setStrategy("Sugestão de Índice Completo");
+        indiceCompleto.setAuthor("Luciana Perciliano");
+        heuristics.add(indiceCompleto);
+
+        Heuristic indiceParcial = new Heuristic();
+        indiceParcial.setName("HeuristicaIndiceParcial");
+        indiceParcial.setVersion("1.0");
+        indiceParcial.setStrategy("Sugestão de Índice Parcial");
+        indiceParcial.setAuthor("Luciana Perciliano");
+        heuristics.add(indiceParcial);
+
+        Heuristic visaoMaterializada = new Heuristic();
+        visaoMaterializada.setName("HeuristicaVisaoMaterializada");
+        visaoMaterializada.setVersion("1.0");
+        visaoMaterializada.setStrategy("Sugestão de Visão Materializada");
+        visaoMaterializada.setAuthor("Luciana Perciliano");
+        heuristics.add(visaoMaterializada);
         
         return heuristics;
     }

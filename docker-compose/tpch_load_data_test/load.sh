@@ -104,7 +104,7 @@ mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE \
                                     L_SHIPINSTRUCT CHAR(25) NOT NULL,
                                     L_SHIPMODE     CHAR(10) NOT NULL,
                                     L_COMMENT      VARCHAR(44) NOT NULL )";
-mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --execute="LOAD DATA INFILE '/opt/lineitem.tbl' INTO TABLE LINEITEM FIELDS TERMINATED BY '|'";
+mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --execute="START TRANSACTION; LOAD DATA INFILE '/opt/lineitem.tbl' INTO TABLE LINEITEM FIELDS TERMINATED BY '|'; COMMIT;";
 
 mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE --execute="DROP TABLE IF EXISTS matviews";
 mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE \

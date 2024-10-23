@@ -532,6 +532,7 @@ def get_parameters(database, explain='explain'):
 
 
 if __name__ == '__main__':
+    # time.sleep(60)
     database = str(sys.argv[1].split('.')[0])
     dbms = str(sys.argv[2])
     explain = str(sys.argv[3])
@@ -539,3 +540,4 @@ if __name__ == '__main__':
     print(repetition)
     execute_test_and_charts(database, dbms, explain, '', repetition)
     print('done!')
+    # time.sleep(60*60*24)

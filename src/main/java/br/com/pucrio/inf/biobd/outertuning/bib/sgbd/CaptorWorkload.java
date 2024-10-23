@@ -263,7 +263,7 @@ public final class CaptorWorkload {
         File jsonFile = new File(filePath);
         String absolutePath = jsonFile.getAbsolutePath();
     
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     
         // Extrair apenas as queries SQL reais
         List<Map<String, String>> extractedQueries = new ArrayList<>();
