@@ -220,12 +220,15 @@ public class CoordenatorAgent {
     public String getActionsFromChart() {
         ArrayList<String> result = new ArrayList<>();
         log.msg("DEBUG_ACTIONS_CHART: Starting to gather actions from chart.");
-    
+        
         for (SQL sql : lastSQLCaptured) {
             log.msg("DEBUG_ACTIONS_CHART: Processing SQL ID: " + sql.getId());
             for (ActionSF actionSF : sql.getActionsSF()) {
-                log.msg("DEBUG_ACTIONS_CHART: Processing ActionSF ID: " + actionSF.getId() + ", Bonus: " + actionSF.getBonus() + ", Creation Cost: " + actionSF.getCreationCost() + ", Type: " + actionSF.getType() + ", SQL Size: " + actionSF.getSql().size());
-                String actionTemp = "['" + actionSF.getId() + "', " + actionSF.getBonus() + ", " + actionSF.getCreationCost() + ", '" + actionSF.getType() + "', " + actionSF.getSql().size() + "]";
+                log.msg("DEBUG_ACTIONS_CHART: Processing ActionSF ID: " + actionSF.getId() + ", Bonus: " + actionSF.getGain() + ", Creation Cost: " + actionSF.getCreationCost() + ", Type: " + actionSF.getType() + ", SQL Size: " + actionSF.getSql().size());
+                
+                // Usa o próprio Gain Expectancy como Usage Rate
+                String actionTemp = "['" + actionSF.getId() + "', " + actionSF.getGain() + ", " + actionSF.getCreationCost() + ", '" + actionSF.getType() + "', " + actionSF.getBonus() + "]";
+                
                 if (!result.contains(actionTemp)) {
                     result.add(actionTemp);
                 }
@@ -234,8 +237,11 @@ public class CoordenatorAgent {
         
         log.msg("DEBUG_ACTIONS_CHART: Gathering all actions from actionsSF.");
         for (ActionSF actionSF : this.OTAgent.getAllActions()) {
-            log.msg("DEBUG_ACTIONS_CHART: Processing ActionSF from actionsSF ID: " + actionSF.getId() + ", Bonus: " + actionSF.getBonus() + ", Creation Cost: " + actionSF.getCreationCost() + ", Type: " + actionSF.getType());
-            String actionTemp = "['" + actionSF.getId() + "', " + actionSF.getBonus() + ", " + actionSF.getCreationCost() + ", '" + actionSF.getType() + "', 0]";
+            log.msg("DEBUG_ACTIONS_CHART: Processing ActionSF from actionsSF ID: " + actionSF.getId() + ", Bonus: " + actionSF.getGain() + ", Creation Cost: " + actionSF.getCreationCost() + ", Type: " + actionSF.getType());
+            
+            // Usa o próprio Gain Expectancy como Usage Rate
+            String actionTemp = "['" + actionSF.getId() + "', " + actionSF.getGain() + ", " + actionSF.getCreationCost() + ", '" + actionSF.getType() + "', " + actionSF.getBonus() + "]";
+            
             if (!result.contains(actionTemp)) {
                 result.add(actionTemp);
             }
@@ -248,12 +254,13 @@ public class CoordenatorAgent {
                 toChart += ",";
             }
         }
-        toChart = "['ACTION_ID', 'Gain Expectancy', 'Creation Cost', 'Type', 'N. of SQL Serviced'], " + toChart;
+        toChart = "['ACTION_ID', 'Gain Expectancy', 'Creation Cost', 'Type', 'Usage Rate'], " + toChart;
         
         log.msg("DEBUG_ACTIONS_CHART: Final chart data: " + toChart);
         
         return toChart;
     }
+    
     
     
 

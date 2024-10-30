@@ -50,7 +50,7 @@
                         width: "100%",
                         height: "100%"},
                     vAxis: {title: 'Creation Cost'},
-                    hAxis: {title: 'Gain Expectancy'},
+                    hAxis: {title: 'Gain'},
                     bubble: {
                         textStyle: {
                             auraColor: 'none',

@@ -20,9 +20,11 @@ import br.com.pucrio.inf.biobd.outertuning.ontology.DebugConcepts;
 import br.com.pucrio.inf.biobd.outertuning.ontology.Ontology;
 import org.protege.owl.portability.query.Result;
 import org.protege.owl.portability.query.ResultException;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.lang.Math;
-
 
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -33,18 +35,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Arrays;
 
-
-
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.FileReader;
 import java.io.IOException;
 
-
 import java.util.Random;
-
 
 import static java.lang.Thread.sleep;
 
@@ -114,25 +110,24 @@ public class OuterTuningAgent implements Runnable {
         }
 
         if (isVisaoMaterializadaHeuristicSelected) {
-            log.msg("Heurística de Visão Materializada (Heuristica Visao Materializada) está selecionada.");
+            log.msg("Heurística de Visão Materializada (HeuristicaVisaoMaterializada) está selecionada.");
         } else {
-            log.msg("Heurística de Visão Materializada (Heuristica Visao Materializada) não está selecionada.");
+            log.msg("Heurística de Visão Materializada (HeuristicaVisaoMaterializada) não está selecionada.");
         }
 
         if (isIndiceCompletoHeuristicSelected) {
-            log.msg("Heurística de Índice Completo (Heuristica Indice Completo) está selecionada.");
+            log.msg("Heurística de Índice Completo (HeuristicaIndiceCompleto) está selecionada.");
         } else {
-            log.msg("Heurística de Índice Completo (Heuristica Indice Completo) não está selecionada.");
+            log.msg("Heurística de Índice Completo (HeuristicaIndiceCompleto) não está selecionada.");
         }
 
         if (isIndiceParcialHeuristicSelected) {
-            log.msg("Heurística de Índice Parcial (Heuristica Indice Parcial) está selecionada.");
+            log.msg("Heurística de Índice Parcial (HeuristicaIndiceParcial) está selecionada.");
         } else {
-            log.msg("Heurística de Índice Parcial (Heuristica Indice Parcial) não está selecionada.");
+            log.msg("Heurística de Índice Parcial (HeuristicaIndiceParcial) não está selecionada.");
         }
         
         while (this.running) {
-
 
             try {
                 captor.verifyDatabase();
@@ -193,7 +188,6 @@ public class OuterTuningAgent implements Runnable {
 
     public void addRealisticTestActions() {
         try {
-            List<ActionSF> testActions = new ArrayList<>();
             Thread.sleep(30000);
             captor.verifyDatabase();  // Captura as últimas queries
             captor.saveSchemaAndQueriesToJson();  // Salva as últimas queries em um arquivo JSON
@@ -210,8 +204,6 @@ public class OuterTuningAgent implements Runnable {
                 JsonArray tablesArray = schemaJson.getAsJsonArray("tables");
                 Map<String, Long> tableRowsMap = new HashMap<>();
 
-                List<ActionSF> actionsList = new ArrayList<>();
-
                 // Mapeia o nome da tabela ao número de linhas
                 for (int i = 0; i < tablesArray.size(); i++) {
                     JsonObject tableObj = tablesArray.get(i).getAsJsonObject();
@@ -221,63 +213,127 @@ public class OuterTuningAgent implements Runnable {
                     log.msg("tabela:" + tableName + "linhas: " + numberRows);
                 }
 
-
-
-                // // Itera sobre cada objeto no JSON array
+                // Itera sobre cada objeto no JSON array
                 for (int i = 0; i < jsonArray.size(); i++) {
                     JsonObject jsonObject = jsonArray.get(i).getAsJsonObject();
-        
-                //     // Cria uma nova ação a partir do JSON
+
+                    // Extrai todas as informações necessárias
+                    String id = null;
+                    String command = null;
+                    String rule = null;
+                    JsonArray sqlsArray = null;
+                    float bonus = 0;
+
+                    // Verifica e extrai 'id'
+                    if (jsonObject.has("id") && !jsonObject.get("id").isJsonNull()) {
+                        id = jsonObject.get("id").getAsString();
+                    } else {
+                        log.error("Campo 'id' ausente ou nulo no objeto JSON.");
+                        continue; // Pula este objeto
+                    }
+
+                    // Verifica e extrai 'command'
+                    if (jsonObject.has("command") && !jsonObject.get("command").isJsonNull()) {
+                        command = jsonObject.get("command").getAsString();
+                    } else {
+                        log.error("Campo 'command' ausente ou nulo no objeto JSON com id: " + id);
+                        continue;
+                    }
+
+                    // Verifica e extrai 'rule'
+                    if (jsonObject.has("rule") && !jsonObject.get("rule").isJsonNull()) {
+                        rule = jsonObject.get("rule").getAsString();
+                    } else {
+                        log.error("Campo 'rule' ausente ou nulo no objeto JSON com id: " + id);
+                        continue;
+                    }
+
+                    // Verifica e extrai 'bonus'
+                    if (jsonObject.has("bonus") && !jsonObject.get("bonus").isJsonNull()) {
+                        bonus = jsonObject.get("bonus").getAsFloat();
+                    } else {
+                        log.error("Campo 'bonus' ausente ou nulo no objeto JSON com id: " + id);
+                        continue;
+                    }
+
+                    // Verifica e extrai 'sqls'
+                    if (jsonObject.has("sqls") && jsonObject.get("sqls").isJsonArray()) {
+                        sqlsArray = jsonObject.getAsJsonArray("sqls");
+                    } else if (jsonObject.has("sql") && !jsonObject.get("sql").isJsonNull()) {
+                        // Suporte para formato antigo com 'sql' único
+                        sqlsArray = new JsonArray();
+                        sqlsArray.add(jsonObject.get("sql").getAsString());
+                    } else {
+                        log.error("Campo 'sqls' ou 'sql' ausente ou nulo no objeto JSON com id: " + id);
+                        continue;
+                    }
+
+                    // Verifica se há pelo menos um SQL
+                    if (sqlsArray.size() == 0) {
+                        log.error("Nenhum SQL encontrado no objeto JSON com id: " + id);
+                        continue;
+                    }
+
+                    // Verifica se a heurística correspondente à regra está selecionada
+                    if (rule.equals("RuleHypSimpleIndex") && isIndiceCompletoHeuristicSelected) {
+                        // Continua o processamento
+                    } else if (rule.equals("RuleHypMaterializedView") && isVisaoMaterializadaHeuristicSelected) {
+                        // Continua o processamento
+                    } else if (rule.equals("RuleHypCompositeIndex") && isIndiceCompletoHeuristicSelected) {
+                        // Continua o processamento
+                    } else if (rule.equals("RuleSimplePartialIndex") && isIndiceParcialHeuristicSelected) {
+                        // Continua o processamento
+                    } else {
+                        continue; // Pula para o próximo item se a heurística não estiver selecionada
+                    }
+
+                    // Se chegou aqui, todas as informações necessárias estão presentes
+                    // Agora cria o ActionSF e define seus campos
                     ActionSF newAction = new ActionSF();
-                    newAction.setId(jsonObject.get("id").getAsString());
-                    newAction.setName(jsonObject.get("id").getAsString());
+                    newAction.setId(id);
+                    newAction.setName(id);
                     newAction = this.getActionFromList(newAction);
-                    newAction.setCommand(jsonObject.get("command").getAsString());
-                    newAction.setJustify(jsonObject.get("rule").getAsString());
+                    newAction.setCommand(command);
+                    newAction.setJustify(rule);
                     newAction.setHeuristic("HeuristicaIndicesDinamicos");
-                    newAction.addSql(captor.getSqlCaptured(jsonObject.get("sql").getAsString()));
-                    // newAction.setStatus("suggested");
-                    newAction.setBonus(jsonObject.get("bonus").getAsFloat());
+
+                    // Adiciona os SQLs ao ActionSF
+                    for (JsonElement sqlElement : sqlsArray) {
+                        String sql = sqlElement.getAsString();
+                        log.msg("Processing SQL: " + sql);
+                        SQL sqlObj = captor.getSqlCaptured(sql);
+                        if (sqlObj == null) {
+                            continue;
+                        }
+                        newAction.addSql(sqlObj);
+                    }
+
+                    newAction.setBonus(bonus);
                     newAction.setStatus("suggested");
 
-                    String sqlCommand = jsonObject.get("command").getAsString();
+                    String sqlCommand = command;
                     String tableName = extractTableName(sqlCommand);
                     log.msg("nome da tabela: " + tableName);
-                    
+
                     // Define o custo de criação com base no número de linhas da tabela
                     Long numberOfRows = tableRowsMap.getOrDefault(tableName.toLowerCase(), 0L);
-                    newAction.setCreationCost((numberOfRows > 0) ? (float) (Math.log(numberOfRows) / Math.log(100)) : 0);
+                    newAction.setCreationCost((numberOfRows > 0) ? (float) (Math.log(numberOfRows) / Math.log(10)) : 0);
+                    newAction.setType(rule);
+                    // Ação já adicionada via getActionFromList()
+                    // this.actionsSF.add(newAction);
 
-                    String rule = jsonObject.get("rule").getAsString();
-                    if (rule.equals("RuleHypSimpleIndex") && isIndiceCompletoHeuristicSelected) {
-                        newAction.setType("Simple Index");
-                    } 
-                    else if (rule.equals("RuleHypMaterializedView") && isVisaoMaterializadaHeuristicSelected) {
-                        newAction.setType("Materialized View");
-                    } 
-                    else if (rule.equals("RuleHypCompositeIndex") && isIndiceParcialHeuristicSelected) {
-                        newAction.setType("Composite Index");
-                    }
-                    else if (rule.equals("RuleHypPartialIndex") && isIndiceParcialHeuristicSelected) {
-                        newAction.setType("Partial Index");
-                    }
-                    else {
-                        continue; 
-                    }
-                    actionsList.add(newAction);
-        
                     // Adiciona a nova ação à lista
-                    log.msg("Ação de teste específica adicionada com sucesso: ID = " + jsonObject.get("id").getAsString()
-                    + ", Name = " + jsonObject.get("id").getAsString()
-                    + ", Command = " + jsonObject.get("command").getAsString()
-                    + ", Justify = " + jsonObject.get("rule").getAsString()
+                    log.msg("Ação de teste específica adicionada com sucesso: ID = " + id
+                    + ", Name = " + id
+                    + ", Command = " + command
+                    + ", Justify = " + rule
                     + ", Heuristic = " + newAction.getHeuristic()
-                    + ", SQL = " + jsonObject.get("sql").getAsString()
-                    // + ", Status = " + newAction.getStatus()
+                    // + ", SQLs = " + sqlsArray.toString()
+                    + ", Status = " + newAction.getStatus()
                     + ", Type = " + newAction.getType()
                     );
                 }
-        
+
                 reader.close();
             } catch (IOException e) {
                 log.error("Erro ao ler o arquivo JSON: " + e.getMessage());
@@ -362,8 +418,8 @@ public class OuterTuningAgent implements Runnable {
                     action.setCost(Float.valueOf(result.getValue("?cost").toString()));
                     action.setType("Materialized View");
                     result.next();
-    
-                    log.msg("Ação lida: " + action.toString()); // Adicionar log para cada ação lida
+
+                    log.msg("Ação lida: " + action.toString());
                 }
             } catch (ResultException ex) {
                 log.error("Erro ao ler todas as ações: " + ex.getMessage());
@@ -391,8 +447,8 @@ public class OuterTuningAgent implements Runnable {
                     action.setCost(Float.valueOf(result.getValue("?cost").toString()));
                     action.setType("Materialized View");
                     result.next();
-    
-                    log.msg("Ação candidata lida: " + action.toString()); // Adicionar log para cada ação candidata lida
+
+                    log.msg("Ação candidata lida: " + action.toString());
                 }
             } catch (ResultException ex) {
                 log.error("Erro ao ler todas as ações candidatas: " + ex.getMessage());

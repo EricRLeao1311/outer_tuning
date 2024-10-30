@@ -203,4 +203,40 @@ public class ActionSF {
         return result;
     }
 
+    public double getGain() {
+        // Inicializa as variáveis para calcular o Custo Médio
+        double totalAvgCost = 0.0;
+        int sqlCount = 0;
+    
+        // Percorre as declarações SQL associadas
+        for (SQL associatedSql : this.getSql()) {
+            double avgCost = associatedSql.getCostAVG(null); // Use o intervalo adequado, se necessário
+            totalAvgCost += avgCost;
+            sqlCount++;
+        }
+    
+        // Calcula o Custo Médio
+        double averageCost = (sqlCount > 0) ? (totalAvgCost / sqlCount) : 0.0;
+    
+        // Obtém o Custo de Execução
+        double executionCost = this.getCost();
+        if (executionCost == 0) {
+            executionCost = 1; // Evita divisão por zero
+        }
+    
+        // Calcula a razão
+        double ratio = averageCost / executionCost;
+    
+        // Calcula o logaritmo base 10
+        double logRatio;
+        if (ratio > 1) {
+            logRatio = Math.log10(ratio);
+        } else {
+            // Trata casos onde a razão é zero ou negativa
+            logRatio = 0;
+        }
+    
+        return (logRatio > 0 ? logRatio : 0);
+    }    
+
 }
