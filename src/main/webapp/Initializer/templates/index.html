@@ -92,7 +92,7 @@
                     <p>Click "Start" to initialize the system setup and begin tuning operations for optimal performance.</p>
                     
                     <!-- Form for Configuration -->
-                    <form id="configForm" method="post" action="/submit-config">
+                    <form id="configForm" method="post" action="/submit-config" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="dbms">DBMS:</label>
                             <select class="form-control" id="dbms" name="dbms" required>
@@ -125,6 +125,24 @@
                         <div class="form-group">
                             <label for="tna">TNA:</label>
                             <input type="text" class="form-control" id="tna" name="tna" required placeholder="Enter TNA (e.g., tpch)">
+                        </div>
+
+                        <!-- Additional Input Fields -->
+                        <div class="form-group">
+                            <label for="sql_files">Upload .sql files:</label>
+                            <input type="file" class="form-control" id="sql_files" name="sql_files" multiple>
+                        </div>
+                        <div class="form-group">
+                            <label for="additional_sql">Additional SQL:</label>
+                            <textarea class="form-control" id="additional_sql" name="additional_sql" rows="4" placeholder="Enter additional SQL commands"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="num_runs">Number of times to run the code:</label>
+                            <input type="number" class="form-control" id="num_runs" name="num_runs" placeholder="Enter number of runs">
+                        </div>
+                        <div class="form-group">
+                            <label for="interval_minutes">Interval in minutes between executions:</label>
+                            <input type="number" class="form-control" id="interval_minutes" name="interval_minutes" placeholder="Enter interval in minutes">
                         </div>
 
                         <!-- Submit Button inside the form -->

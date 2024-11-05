@@ -18,9 +18,8 @@
                     <li><a href="ServletAgents?cmd=documentation">Documentation</a></li>
                     <!-- Botão de Stop Process -->
                     <li>
-                        <a href="#" onclick="event.preventDefault(); document.getElementById('stopProcessForm').submit();">Stop Process</a>
-                        <form id="stopProcessForm" action="stopProcess" method="post" style="display:none;"></form>
-                    </li>                    
+                        <a href="#" onclick="window.location.href='http://127.0.0.1:5000/'; return false;">Stop Process</a>
+                    </li>
                 </ul>
             </div>
         </div>

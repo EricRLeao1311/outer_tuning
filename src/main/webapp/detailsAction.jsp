@@ -1,4 +1,3 @@
-
 <%@page import="java.util.Locale"%>
 <%@page import="java.text.DecimalFormatSymbols"%>
 <%@page import="br.com.pucrio.inf.biobd.outertuning.bib.base.Interval"%>
@@ -15,7 +14,24 @@
 <script type="text/javascript">
     google.charts.setOnLoadCallback(drawChartAction);
     function drawChartAction() {
+        // Obtenha os dados brutos da ação
         var dataAction = google.visualization.arrayToDataTable(<%=action.getDataFromChartIDE()%>);
+        
+        // Crie uma DataView para adicionar uma coluna com os valores
+        var view = new google.visualization.DataView(dataAction);
+        view.setColumns([0, 1, {
+            calc: "stringify",
+            sourceColumn: 1,
+            type: "string",
+            role: "annotation"
+        }, 2, {
+            calc: "stringify",
+            sourceColumn: 2,
+            type: "string",
+            role: "annotation"
+        }]);
+
+        // Configurações do gráfico
         var optionsAction = {
             backgroundColor: '#F4F1EA',
             chartArea: {
@@ -24,17 +40,28 @@
                 right: 10,
                 bottom: 20,
                 width: "100%",
-                height: "100%"},
+                height: "100%"
+            },
             chart: {
                 title: 'SQL Performance',
                 subtitle: 'Simulation of the tuning action creation',
             },
             is3D: true,
             bars: 'horizontal',
-            colors: ['#db4437', '#4285f4']
+            colors: ['#db4437', '#4285f4'],
+            annotations: {
+                alwaysOutside: true,
+                textStyle: {
+                    fontSize: 12,
+                    color: '#000',
+                    auraColor: 'none'
+                }
+            }
         };
-        var chartAction = new google.charts.Bar(document.getElementById('details_action_sf'));
-        chartAction.draw(dataAction, optionsAction);
+
+        // Desenhe o gráfico usando a DataView
+        var chartAction = new google.visualization.BarChart(document.getElementById('details_action_sf'));
+        chartAction.draw(view, optionsAction);
     }
 </script>
 

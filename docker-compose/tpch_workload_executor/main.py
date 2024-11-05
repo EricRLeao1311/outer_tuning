@@ -18,7 +18,6 @@ import pandas as pd
 import pandas.io.sql as pdsql
 import psycopg2
 
-
 def get_file_safe_to_write(filename, operation_type):
     i = 0
     while i < 60:
@@ -408,9 +407,11 @@ def execute_file_queries(params_inn, queries):
 def workload_execute(params_inn):
     print('Executing: workload_execute')
     path = 'queries' + os.sep + params_inn['dbms'] + os.sep + params_inn['repetition'] + os.sep
+    print(f"Caminho das queries: {path}")
     if params_inn['mv']:
         path = path + 'mv' + os.sep
     files = [f for f in listdir(path) if isfile(join(path, f))]
+    print(f"Arquivos encontrados: {files}")
     all_queries = []
     shuffled_queries = []
     for item in files:
@@ -530,6 +531,23 @@ def get_parameters(database, explain='explain'):
     pprint(params_inn)
     return params_inn
 
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
+def get_run_info():
+    try:
+        with open("./docker-compose/tpch_workload_executor/run_info.txt", 'r') as f:
+            lines = f.readlines()
+        num_runs = 1
+        interval_minutes = 0
+        for line in lines:
+            if 'Number of Runs' in line:
+                num_runs = int(line.strip().split(':')[1])
+            elif 'Interval Minutes' in line:
+                interval_minutes = int(line.strip().split(':')[1])
+        return num_runs, interval_minutes
+    except FileNotFoundError:
+        print("run_info.txt not found, defaulting to 1 run and 0 minutes interval.")
+        return 1, 0
 
 if __name__ == '__main__':
     # time.sleep(60)
@@ -537,7 +555,17 @@ if __name__ == '__main__':
     dbms = str(sys.argv[2])
     explain = str(sys.argv[3])
     repetition = str(sys.argv[4])
-    print(repetition)
-    execute_test_and_charts(database, dbms, explain, '', repetition)
-    print('done!')
-    # time.sleep(60*60*24)
+    print(f"Repetition: {repetition}")
+    num_runs, interval_minutes = get_run_info()
+    interval_seconds = interval_minutes * 60
+    print(f"Number of runs: {num_runs}, Interval between runs: {interval_minutes} minutes")
+
+    while num_runs > 0:
+        print(f"Run {num_runs} of {num_runs}")
+        execute_test_and_charts(database, dbms, explain, '', repetition)
+        print('done!')
+        print(f"Waiting for {interval_minutes} minutes before next run...")
+        time.sleep(interval_seconds)
+        num_runs -= 1
+    while True:
+        time.sleep(60 * 60 * 24)
