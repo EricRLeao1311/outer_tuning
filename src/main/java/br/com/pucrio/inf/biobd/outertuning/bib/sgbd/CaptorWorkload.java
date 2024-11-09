@@ -349,7 +349,7 @@ public final class CaptorWorkload {
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://webapi:8080/api/receiveData"))
+                    .uri(URI.create("http://webapi:8008/api/receiveData"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonContent))
                     .build();

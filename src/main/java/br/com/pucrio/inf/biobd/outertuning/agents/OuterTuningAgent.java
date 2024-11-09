@@ -40,6 +40,20 @@ import com.google.gson.JsonParser;
 import java.io.FileReader;
 import java.io.IOException;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+
 import java.util.Random;
 
 import static java.lang.Thread.sleep;
@@ -191,12 +205,35 @@ public class OuterTuningAgent implements Runnable {
             Thread.sleep(30000);
             captor.verifyDatabase();  // Captura as últimas queries
             captor.saveSchemaAndQueriesToJson();  // Salva as últimas queries em um arquivo JSON
+            Thread.sleep(30000);
             //chama a webapi
             try {
-                // Lê o JSON do arquivo
-                Gson gson = new Gson();
-                FileReader reader = new FileReader("docker-compose/tpch_workload_executor/output/Result.json");
-                JsonArray jsonArray = JsonParser.parseReader(reader).getAsJsonArray();
+                JsonObject jsonSchema = null;
+                try {
+                    FileReader reader = new FileReader("docker-compose/tpch_workload_executor/output/schema_and_queries.json");
+                    jsonSchema = JsonParser.parseReader(reader).getAsJsonObject();
+                    reader.close();
+                    Thread.sleep(30000);
+                    System.out.println("Leitura do JSON Completa");
+                } catch (IOException e) {
+                    System.out.println("Error reading JSON file: " + e.getMessage());
+                    return;
+                }
+                System.out.println("Tentativa de enviar JSON para a WebAPI");
+                JsonArray jsonArray = new JsonArray();
+                try {
+                    // Call the static processing method and get the result
+                    jsonArray = sendJsonRequest(jsonSchema);
+                    // 10 primeiras linhas do resultado da WebAPI
+                    JsonArray resultArray = new JsonArray();
+                    for (int i = 0; i < 10; i++) {
+                        resultArray.add(jsonArray.get(i));
+                    }
+                    System.out.println("Resultado da WebAPI: " + resultArray);
+                } catch (Exception e) {
+                    System.out.println("Um erro ocorreu com a WebAPI: " + e.getMessage());
+                    e.printStackTrace();
+                }
 
                 // Lê o JSON de schema_and_queries para obter o número de linhas
                 FileReader schemaReader = new FileReader("docker-compose/tpch_workload_executor/output/schema_and_queries.json");
@@ -276,16 +313,22 @@ public class OuterTuningAgent implements Runnable {
 
                     // Verifica se a heurística correspondente à regra está selecionada
                     if (rule.equals("RuleHypSimpleIndex") && isIndiceCompletoHeuristicSelected) {
+                        System.out.println("Processando regra: RuleHypSimpleIndex com a heurística Índice Completo selecionada");
                         // Continua o processamento
-                    } else if (rule.equals("RuleHypMaterializedView") && isVisaoMaterializadaHeuristicSelected) {
+                    } else if (rule.equals("RuleHypViewAdapted") && isVisaoMaterializadaHeuristicSelected) {
+                        System.out.println("Processando regra: RuleHypMaterializedView com a heurística Visão Materializada selecionada");
                         // Continua o processamento
                     } else if (rule.equals("RuleHypCompositeIndex") && isIndiceCompletoHeuristicSelected) {
+                        System.out.println("Processando regra: RuleHypCompositeIndex com a heurística Índice Completo selecionada");
                         // Continua o processamento
                     } else if (rule.equals("RuleSimplePartialIndex") && isIndiceParcialHeuristicSelected) {
+                        System.out.println("Processando regra: RuleSimplePartialIndex com a heurística Índice Parcial selecionada");
                         // Continua o processamento
                     } else {
+                        System.out.println("Heurística não selecionada para a regra: " + rule + ". Pulando para o próximo item.");
                         continue; // Pula para o próximo item se a heurística não estiver selecionada
                     }
+
 
                     // Se chegou aqui, todas as informações necessárias estão presentes
                     // Agora cria o ActionSF e define seus campos
@@ -312,15 +355,43 @@ public class OuterTuningAgent implements Runnable {
                     newAction.setStatus("suggested");
 
                     String sqlCommand = command;
-                    String tableName = extractTableName(sqlCommand);
-                    log.msg("nome da tabela: " + tableName);
+                    // Verifica se é uma criação de visão materializada
+                    if (rule.equals("RuleHypMaterializedView")) {
+                        // List<String> tableNames = extractTableNames(sqlCommand);
+                        // log.msg("Nomes das tabelas envolvidas na visão materializada: " + tableNames);
+                        
+                        // // Calcula o custo de criação com base no número de linhas de todas as tabelas envolvidas
+                        // float creationCost = 0;
+                        // for (String tableName : tableNames) {
+                        //     Long numberOfRows = tableRowsMap.getOrDefault(tableName.toLowerCase(), 0L);
+                        //     creationCost += (numberOfRows > 0) ? (float) (Math.log(numberOfRows) / Math.log(10)) : 0;
+                        // }
+                        newAction.setCreationCost(12);
+                    } else {
+                        // Para índices, mantenha o comportamento atual
+                        String tableName = extractTableName(sqlCommand);
+                        log.msg("Nome da tabela: " + tableName);
 
-                    // Define o custo de criação com base no número de linhas da tabela
-                    Long numberOfRows = tableRowsMap.getOrDefault(tableName.toLowerCase(), 0L);
-                    newAction.setCreationCost((numberOfRows > 0) ? (float) (Math.log(numberOfRows) / Math.log(10)) : 0);
-                    newAction.setType(rule);
-                    // Ação já adicionada via getActionFromList()
-                    // this.actionsSF.add(newAction);
+                        // Define o custo de criação com base no número de linhas da tabela
+                        Long numberOfRows = tableRowsMap.getOrDefault(tableName.toLowerCase(), 0L);
+                        newAction.setCreationCost((numberOfRows > 0) ? (float) (Math.log(numberOfRows) / Math.log(10)) : 0);
+                    }
+
+                    if (rule.equals("RuleHypSimpleIndex")) {
+                        System.out.println("Processando regra: RuleHypSimpleIndex com a heurística Índice Completo selecionada");
+                        newAction.setType("Simple Index");
+                    } else if (rule.equals("RuleHypViewAdapted")) {
+                        System.out.println("Processando regra: RuleHypViewAdapted com a heurística Visão Materializada selecionada");
+                        newAction.setType("Materialized View");
+                    } else if (rule.equals("RuleHypCompositeIndex")) {
+                        System.out.println("Processando regra: RuleHypCompositeIndex com a heurística Índice Completo selecionada");
+                        newAction.setType("Composite Index");
+                    } else if (rule.equals("RuleSimplePartialIndex")) {
+                        System.out.println("Processando regra: RuleSimplePartialIndex com a heurística Índice Parcial selecionada");
+                        newAction.setType("Partial Index");
+                    } else {
+                        System.out.println("Regra não identificada ou heurística não selecionada corretamente");
+                    }                    
 
                     // Adiciona a nova ação à lista
                     log.msg("Ação de teste específica adicionada com sucesso: ID = " + id
@@ -334,7 +405,6 @@ public class OuterTuningAgent implements Runnable {
                     );
                 }
 
-                reader.close();
             } catch (IOException e) {
                 log.error("Erro ao ler o arquivo JSON: " + e.getMessage());
             } catch (Exception e) {
@@ -483,4 +553,65 @@ public class OuterTuningAgent implements Runnable {
             return "";
         }
     }
+
+    public static JsonArray sendJsonRequest(JsonObject jsonObject) {
+        JsonArray jsonArray = new JsonArray();
+        try {
+            System.out.println("Entrei na função sendJsonRequest");
+    
+            // A URL do endpoint da API
+            URL url = new URL("http://webapi:8008/api");
+            System.out.println("URL da API definida: " + url);
+    
+            // Criação de uma conexão HTTP
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json; utf-8");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setDoOutput(true);
+            System.out.println("Conexão HTTP configurada");
+    
+            // Converte JsonObject para uma string JSON
+            Gson gson = new Gson();
+            String jsonInputString = gson.toJson(jsonObject);
+            // Print das 10 primeiras linhas do JSON de entrada
+            System.out.println("JSON de entrada: " + jsonInputString.substring(0, Math.min(jsonInputString.length(), 1000)));
+    
+            // Escreve os dados JSON no stream de saída
+            try (OutputStream outputStream = connection.getOutputStream()) {
+                byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
+                outputStream.write(input, 0, input.length);
+                System.out.println("Dados JSON enviados para a API");
+            }
+    
+            // Lê a resposta da API
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+
+            // Print do inicio da resposta da API
+            System.out.println("Resposta da API: " + response.toString().substring(0, Math.min(response.toString().length(), 1000)));
+    
+            // Parseia a resposta JSON para um JsonArray
+            jsonArray = gson.fromJson(response.toString(), JsonArray.class);
+            System.out.println("Resposta convertida para JsonArray");
+    
+            // Fecha a conexão
+            connection.disconnect();
+            System.out.println("Conexão HTTP fechada");
+    
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Erro ao enviar a requisição JSON: " + e.getMessage());
+        }
+    
+        // Retorna o JsonArray
+        //Print do inicio do JsonArray
+        System.out.println("JsonArray retornado: " + jsonArray.toString().substring(0, Math.min(jsonArray.toString().length(), 1000)));
+        return jsonArray;
+    }    
+
 }

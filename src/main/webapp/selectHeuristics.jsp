@@ -63,7 +63,7 @@
                                 <tr>
                                     <td>
                                         <% if ("HeuristicaVisaoMaterializada".equals(heuristicName)) { %>
-                                            <input type="checkbox" name="<%= heuristicName %>" value="true" disabled>
+                                            <input type="checkbox" name="<%= heuristicName %>" value="true">
                                         <% } else { %>
                                             <input type="checkbox" name="<%= heuristicName %>" value="true">
                                         <% } %>

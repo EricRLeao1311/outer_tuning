@@ -41,13 +41,11 @@ services:
 
   webapi:
     build:
-      context: ./webapi/demo/demo
+      context: ./webapi/spinrdf
       dockerfile: ./Dockerfile
     restart: always
     ports:
-      - 8080:8080
-    volumes:
-      - "./tpch_workload_executor/output:/usr/local/tomcat/docker-compose/tpch_workload_executor/output"
+      - 8008:8008
     networks:
       - mynetwork
 
@@ -66,4 +64,3 @@ services:
       - "./tpch_workload_executor/output:/usr/local/tomcat/docker-compose/tpch_workload_executor/output"
     networks:
       - mynetwork
-
