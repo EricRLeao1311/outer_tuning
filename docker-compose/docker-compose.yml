@@ -46,6 +46,8 @@ services:
     restart: always
     ports:
       - 8008:8008
+    volumes:
+      - "./tpch_workload_executor/output:/usr/local/tomcat/docker-compose/tpch_workload_executor/output"
     networks:
       - mynetwork
 
