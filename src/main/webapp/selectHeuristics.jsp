@@ -7,7 +7,7 @@
 <!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
 <!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
     <head>
-        <title>OT - Select the tuning heuristics</title>
+        <title>OT - Select the tuning actions</title>
         <jsp:include page="helpers/includesHeader.jsp"/>
     </head>
     <body>
@@ -32,7 +32,7 @@
         <div id="content" class="container">
             <div class="row margin-top-30">
                 <div class="col-md-12 text-center">
-                    <h3 class"text-center">Select the tuning heuristics</h3>
+                    <h3 class"text-center">Select the tuning actions</h3>
                 </div>
                 <div class="col-md-12 text-left">
                     <form action="ServletAgents?cmd=workload" id="startTuningAgent" method="POST">
@@ -45,7 +45,7 @@
                             <table >
                                 <tr>
                                     <th style="width: 20px; text-align: center;"> </th>
-                                    <th style="width: 250px; text-align: center;">Heuristic</th>
+                                    <th style="width: 250px; text-align: center;">Action</th>
                                     <th style="width: 100px; text-align: center;">Version</th>
                                     <th style="width: 250px; text-align: center;">Strategy</th>
                                     <th style="width: 300px; text-align: center;">Author</th>
@@ -68,7 +68,7 @@
                                             <input type="checkbox" name="<%= heuristicName %>" value="true">
                                         <% } %>
                                     </td>
-                                    <td><%= heuristicName %> </td>
+                                    <td><%= heuristicName.replace("Heuristica", "") %> </td>
                                     <td style="text-align: center;"><%= heuristic.getVersion() %> </td>
                                     <td><%= heuristic.getStrategy() %> </td>
                                     <td><%= heuristic.getAuthor() %> </td>

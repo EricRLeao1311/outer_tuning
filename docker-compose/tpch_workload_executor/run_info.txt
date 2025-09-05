@@ -1,2 +1,2 @@
 Number of Runs: 3
-Interval Minutes: 2
+Interval Minutes: 3

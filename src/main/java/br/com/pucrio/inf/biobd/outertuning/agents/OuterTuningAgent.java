@@ -208,32 +208,35 @@ public class OuterTuningAgent implements Runnable {
             Thread.sleep(30000);
             //chama a webapi
             try {
-                JsonObject jsonSchema = null;
-                try {
-                    FileReader reader = new FileReader("docker-compose/tpch_workload_executor/output/schema_and_queries.json");
-                    jsonSchema = JsonParser.parseReader(reader).getAsJsonObject();
-                    reader.close();
-                    Thread.sleep(30000);
-                    System.out.println("Leitura do JSON Completa");
-                } catch (IOException e) {
-                    System.out.println("Error reading JSON file: " + e.getMessage());
-                    return;
-                }
-                System.out.println("Tentativa de enviar JSON para a WebAPI");
-                JsonArray jsonArray = new JsonArray();
-                try {
-                    // Call the static processing method and get the result
-                    jsonArray = sendJsonRequest(jsonSchema);
-                    // 10 primeiras linhas do resultado da WebAPI
-                    JsonArray resultArray = new JsonArray();
-                    for (int i = 0; i < 10; i++) {
-                        resultArray.add(jsonArray.get(i));
-                    }
-                    System.out.println("Resultado da WebAPI: " + resultArray);
-                } catch (Exception e) {
-                    System.out.println("Um erro ocorreu com a WebAPI: " + e.getMessage());
-                    e.printStackTrace();
-                }
+            //     JsonObject jsonSchema = null;
+            //     try {
+            //         FileReader reader = new FileReader("docker-compose/tpch_workload_executor/output/schema_and_queries.json");
+            //         jsonSchema = JsonParser.parseReader(reader).getAsJsonObject();
+            //         reader.close();
+            //         Thread.sleep(30000);
+            //         System.out.println("Leitura do JSON Completa");
+            //     } catch (IOException e) {
+            //         System.out.println("Error reading JSON file: " + e.getMessage());
+            //         return;
+            //     }
+            //     System.out.println("Tentativa de enviar JSON para a WebAPI");
+            //     JsonArray jsonArray = new JsonArray();
+            //     try {
+            //         // Call the static processing method and get the result
+            //         jsonArray = sendJsonRequest(jsonSchema);
+            //         // 10 primeiras linhas do resultado da WebAPI
+            //         JsonArray resultArray = new JsonArray();
+            //         for (int i = 0; i < 10; i++) {
+            //             resultArray.add(jsonArray.get(i));
+            //         }
+            //         System.out.println("Resultado da WebAPI: " + resultArray);
+            //     } catch (Exception e) {
+            //         System.out.println("Um erro ocorreu com a WebAPI: " + e.getMessage());
+            //         e.printStackTrace();
+            //     }
+                Gson gson = new Gson();
+                FileReader reader = new FileReader("docker-compose/tpch_workload_executor/output/Result.json");
+                JsonArray jsonArray = JsonParser.parseReader(reader).getAsJsonArray();
 
                 // Lê o JSON de schema_and_queries para obter o número de linhas
                 FileReader schemaReader = new FileReader("docker-compose/tpch_workload_executor/output/schema_and_queries.json");
