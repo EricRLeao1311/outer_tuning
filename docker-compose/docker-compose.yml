@@ -23,6 +23,12 @@ services:
       - seccomp:unconfined
     networks:
       - mynetwork
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-pexample"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
 
   workload:
     image: workload-executor

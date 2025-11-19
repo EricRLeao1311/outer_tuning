@@ -164,29 +164,46 @@ def db_connection(database):
         return mysql_connection(config)
 
 
-def mysql_connection(config):
-    try:
-        cnx = mysql.connector.connect(user=config['user'], password=config['password'],
-                                      host=config['host'],
-                                      database=config['database'])
-        cursor = cnx.cursor()
-        cursor.execute("SET GLOBAL log_output = 'TABLE'")
-        cursor.execute("SET GLOBAL general_log = 'ON'")
-        cursor.close()
+def mysql_connection(config, max_tries=30, wait_seconds=10):
+    attempt = 0
+    while attempt < max_tries:
+        try:
+            print(f"Tentando conectar no MySQL (tentativa {attempt + 1}/{max_tries})...")
+            cnx = mysql.connector.connect(
+                user=config['user'],
+                password=config['password'],
+                host=config['host'],
+                database=config['database'],
+            )
 
-        number_of_rows = 0
-        while number_of_rows == 0:
+            # Liga logs
             cursor = cnx.cursor()
-            cursor.execute("SELECT count(*) FROM lineitem")
-            number_of_rows = cursor.fetchone()[0]
+            cursor.execute("SET GLOBAL log_output = 'TABLE'")
+            cursor.execute("SET GLOBAL general_log = 'ON'")
             cursor.close()
-            time.sleep(2)
 
-        return cnx
-    except Exception as err:
-        print('Error <mysql_connection>: ', config)
-        print('Error <mysql_connection>: ' + str(err))
-        sys.exit(1)
+            # Garante que a tabela lineitem já foi carregada
+            number_of_rows = 0
+            while number_of_rows == 0:
+                cursor = cnx.cursor()
+                cursor.execute("SELECT count(*) FROM lineitem")
+                number_of_rows = cursor.fetchone()[0]
+                cursor.close()
+                if number_of_rows == 0:
+                    print("Tabela lineitem ainda vazia, aguardando carga...")
+                    time.sleep(2)
+
+            print("Conectado ao MySQL e tabela lineitem já carregada.")
+            return cnx
+
+        except Exception as err:
+            attempt += 1
+            print(f"Error <mysql_connection> tentativa {attempt}/{max_tries}: {err}")
+            if attempt >= max_tries:
+                print("Não foi possível conectar ao MySQL após várias tentativas, abortando.")
+                sys.exit(1)
+            time.sleep(wait_seconds)
+
 
 
 def postgresql_connection(config):
@@ -546,8 +563,8 @@ def get_run_info():
                 interval_minutes = int(line.strip().split(':')[1])
         return num_runs, interval_minutes
     except FileNotFoundError:
-        print("run_info.txt not found, defaulting to 1 run and 0 minutes interval.")
-        return 1, 0
+        print("run_info.txt not found, defaulting to 3 run and 3 minutes interval.")
+        return 3, 3
 
 if __name__ == '__main__':
     # time.sleep(60)

@@ -14,7 +14,7 @@
       ],
       "name": "part",
       "id": "Table_PART",
-      "numberRows": 188587
+      "numberRows": 197721
     },
     {
       "columns": [
@@ -29,7 +29,7 @@
       ],
       "name": "customer",
       "id": "Table_CUSTOMER",
-      "numberRows": 147717
+      "numberRows": 148635
     },
     {
       "columns": [
@@ -65,7 +65,7 @@
       ],
       "name": "supplier",
       "id": "Table_SUPPLIER",
-      "numberRows": 9986
+      "numberRows": 9992
     },
     {
       "columns": [
@@ -74,7 +74,7 @@
       ],
       "name": "time_zone",
       "id": "Table_TIME_ZONE",
-      "numberRows": 1815
+      "numberRows": 2074
     },
     {
       "columns": [
@@ -83,7 +83,7 @@
       ],
       "name": "time_zone_name",
       "id": "Table_TIME_ZONE_NAME",
-      "numberRows": 1726
+      "numberRows": 2016
     },
     {
       "columns": [
@@ -92,7 +92,7 @@
       ],
       "name": "help_relation",
       "id": "Table_HELP_RELATION",
-      "numberRows": 1469
+      "numberRows": 1745
     },
     {
       "columns": [
@@ -101,7 +101,7 @@
       ],
       "name": "help_keyword",
       "id": "Table_HELP_KEYWORD",
-      "numberRows": 681
+      "numberRows": 871
     },
     {
       "columns": [
@@ -114,7 +114,7 @@
       ],
       "name": "help_topic",
       "id": "Table_HELP_TOPIC",
-      "numberRows": 590
+      "numberRows": 524
     },
     {
       "columns": [
@@ -127,22 +127,6 @@
       "name": "partsupp",
       "id": "Table_PARTSUPP",
       "numberRows": 100
-    },
-    {
-      "columns": [
-        "Column_O_ORDERKEY",
-        "Column_O_CUSTKEY",
-        "Column_O_ORDERSTATUS",
-        "Column_O_TOTALPRICE",
-        "Column_O_ORDERDATE",
-        "Column_O_ORDERPRIORITY",
-        "Column_O_CLERK",
-        "Column_O_SHIPPRIORITY",
-        "Column_O_COMMENT"
-      ],
-      "name": "orders",
-      "id": "Table_ORDERS",
-      "numberRows": 70
     },
     {
       "columns": [
@@ -194,6 +178,22 @@
     },
     {
       "columns": [
+        "Column_O_ORDERKEY",
+        "Column_O_CUSTKEY",
+        "Column_O_ORDERSTATUS",
+        "Column_O_TOTALPRICE",
+        "Column_O_ORDERDATE",
+        "Column_O_ORDERPRIORITY",
+        "Column_O_CLERK",
+        "Column_O_SHIPPRIORITY",
+        "Column_O_COMMENT"
+      ],
+      "name": "orders",
+      "id": "Table_ORDERS",
+      "numberRows": 22
+    },
+    {
+      "columns": [
         "Column_DATABASE_NAME",
         "Column_TABLE_NAME",
         "Column_LAST_UPDATE",
@@ -216,16 +216,6 @@
       "name": "server_cost",
       "id": "Table_SERVER_COST",
       "numberRows": 6
-    },
-    {
-      "columns": [
-        "Column_R_REGIONKEY",
-        "Column_R_NAME",
-        "Column_R_COMMENT"
-      ],
-      "name": "region",
-      "id": "Table_REGION",
-      "numberRows": 5
     },
     {
       "columns": [
@@ -283,6 +273,16 @@
       ],
       "name": "user",
       "id": "Table_USER",
+      "numberRows": 5
+    },
+    {
+      "columns": [
+        "Column_R_REGIONKEY",
+        "Column_R_NAME",
+        "Column_R_COMMENT"
+      ],
+      "name": "region",
+      "id": "Table_REGION",
       "numberRows": 5
     },
     {
@@ -835,42 +835,6 @@
       "id": "Column_PS_COMMENT"
     },
     {
-      "name": "o_orderkey",
-      "id": "Column_O_ORDERKEY"
-    },
-    {
-      "name": "o_custkey",
-      "id": "Column_O_CUSTKEY"
-    },
-    {
-      "name": "o_orderstatus",
-      "id": "Column_O_ORDERSTATUS"
-    },
-    {
-      "name": "o_totalprice",
-      "id": "Column_O_TOTALPRICE"
-    },
-    {
-      "name": "o_orderdate",
-      "id": "Column_O_ORDERDATE"
-    },
-    {
-      "name": "o_orderpriority",
-      "id": "Column_O_ORDERPRIORITY"
-    },
-    {
-      "name": "o_clerk",
-      "id": "Column_O_CLERK"
-    },
-    {
-      "name": "o_shippriority",
-      "id": "Column_O_SHIPPRIORITY"
-    },
-    {
-      "name": "o_comment",
-      "id": "Column_O_COMMENT"
-    },
-    {
       "name": "user",
       "id": "Column_USER"
     },
@@ -951,6 +915,42 @@
       "id": "Column_N_COMMENT"
     },
     {
+      "name": "o_orderkey",
+      "id": "Column_O_ORDERKEY"
+    },
+    {
+      "name": "o_custkey",
+      "id": "Column_O_CUSTKEY"
+    },
+    {
+      "name": "o_orderstatus",
+      "id": "Column_O_ORDERSTATUS"
+    },
+    {
+      "name": "o_totalprice",
+      "id": "Column_O_TOTALPRICE"
+    },
+    {
+      "name": "o_orderdate",
+      "id": "Column_O_ORDERDATE"
+    },
+    {
+      "name": "o_orderpriority",
+      "id": "Column_O_ORDERPRIORITY"
+    },
+    {
+      "name": "o_clerk",
+      "id": "Column_O_CLERK"
+    },
+    {
+      "name": "o_shippriority",
+      "id": "Column_O_SHIPPRIORITY"
+    },
+    {
+      "name": "o_comment",
+      "id": "Column_O_COMMENT"
+    },
+    {
       "name": "database_name",
       "id": "Column_DATABASE_NAME"
     },
@@ -993,18 +993,6 @@
     {
       "name": "default_value",
       "id": "Column_DEFAULT_VALUE"
-    },
-    {
-      "name": "r_regionkey",
-      "id": "Column_R_REGIONKEY"
-    },
-    {
-      "name": "r_name",
-      "id": "Column_R_NAME"
-    },
-    {
-      "name": "r_comment",
-      "id": "Column_R_COMMENT"
     },
     {
       "name": "host",
@@ -1209,6 +1197,18 @@
     {
       "name": "user_attributes",
       "id": "Column_USER_ATTRIBUTES"
+    },
+    {
+      "name": "r_regionkey",
+      "id": "Column_R_REGIONKEY"
+    },
+    {
+      "name": "r_name",
+      "id": "Column_R_NAME"
+    },
+    {
+      "name": "r_comment",
+      "id": "Column_R_COMMENT"
     },
     {
       "name": "host",

@@ -1,99 +1,92 @@
-# Article
+## Pré-requisitos
+- Docker
+- Docker Compose
+- Python 3.8+
+- Java 17
+- Maven Wrapper (já incluso)
+- WSL2 (para Windows)
 
-https://sol.sbc.org.br/journals/index.php/jidm/article/view/1984
+## Estrutura do Projeto
+```
+outer_tuning/
+├── docker-compose/
+├── src/main/webapp/Initializer/
+│   ├── start_system.py
+│   ├── templates/
+│   └── static/
+├── Makefile
+└── pom.xml
+```
 
-# Problema com docker
+## Executando via Interface Web
+```
+cd outer_tuning/src/main/webapp/Initializer
+python3 start_system.py
+```
+Acesse: http://127.0.0.1:5000
 
+O formulário configura:
+- mysql.config
+- mysql_docker.config
+- run_info.txt
+- Salvamento dos arquivos SQL
+
+E executa internamente:
+- make stop
+- docker system prune -a -f
+- make all
+- make deploy
+
+## Execução Manual
+### Parar containers
 ```
 docker system prune -a
 ```
-
-# Executando o projeto
-
-### Para buildar o projeto
-
-```
-make all
-```
-
-### Para rodar os projetos
-
-```
-make deploy
-```
-
-### Parar os projetos
-
+ou
 ```
 make stop
 ```
 
-### Acessar o projeto
+### Buildar
+```
+make all
+```
 
+### Subir containers
+```
+make deploy
+```
+
+### Acessar o sistema
 ```
 http://localhost/
 ```
 
-# Mysql
-
-O docker-compose ja esta sendo criando e populando as tabelas:
-
-| Tables_in_mysql |
-| --------------- |
-| customer |
-| lineitem |
-| nation |
-| orders |
-| part |
-| partsupp |
-| region |
-| supplier |
-
-### Docker-compose
-
-```yml
-services:
-
-  mysql:
-    image: mysql:8.0.19
-    command: --default-authentication-plugin=mysql_native_password --secure-file-priv=/opt --lower-case-table-names=1
-    restart: always
-    ports:
-      - 3306:3306
-      - 33060:33060
-    volumes:
-      - ./tpch_load_data_test:/opt
-      - ./tpch_load_data_test/load.sh:/docker-entrypoint-initdb.d/load.sh
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: mysql
-    security_opt:
-      - seccomp:unconfined
-
-  workload:
-    image: workload-executor
-    restart: on-failure
-    build:
-      context: ./tpch_workload_executor
-      dockerfile: ./Dockerfile
-    depends_on:
-      - mysql
-    links:
-      - mysql
-
-  outertuning:
-    image: outertuning
-    restart: always
-    depends_on:
-      - mysql
-    links:
-      - mysql
-    ports:
-      - 80:8080
+## Banco de Dados MySQL
+Login:
+```
+mysql -uroot -pexample mysql
 ```
 
-`running: docker-compose -f docker-compose.yml up`
+Tabelas TPCH:
+customer, lineitem, nation, orders, part, partsupp, region, supplier
 
-### Login banco
+## Aviso sobre pull access denied
+O Docker tenta baixar `workload-executor`, mas como não existe no Docker Hub, mostra WARNING.
+O build local continua normalmente.
 
-`mysql -uroot -pexample mysql`
+## Resumo
+- Rodar interface:
+```
+cd outer_tuning/src/main/webapp/Initializer
+python3 start_system.py
+```
+- Manual:
+```
+make all
+make deploy
+```
+- Parar:
+```
+make stop
+```

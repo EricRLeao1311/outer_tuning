@@ -68,10 +68,13 @@ public class Semantic {
     public void readOntology() {
         this.startModelOWL();
         this.startMachineInference();
-        if (config.getProperty("disable_rules").equals("0")) {
+
+        // Se não tiver rule engine, simplesmente não tenta ler heurísticas
+        if (rulesMachine != null && config.getProperty("disable_rules").equals("0")) {
             this.readAllHeuristic();
         }
     }
+
 
     private void startModelOWL() {
         try {
@@ -84,20 +87,16 @@ public class Semantic {
         }
     }
 
-    private void startMachineInference() {
-        try {
-            rulesMachine = P3SWRLRuleEngineFactory.create("Jess", model);
-            rulesMachine.reset();
-            rulesMachine.importSWRLRulesAndOWLKnowledge();
-            if (config.getProperty("disable_rules").equals("0")) {
-                this.disableAllRules();
-            }
-            rulesMachine.run();
-            log.msg("rule_engine_started");
-        } catch (SWRLRuleEngineException ex) {
-            log.error(ex);
-        }
+    // Semantic.java
+
+    public void startMachineInference() {
+        // Em vez de tentar criar Drools/Jess, só loga e deixa o engine nulo
+        log.msg("startMachineInference: Drools/Jess desabilitado nesta versão. Nenhum mecanismo de regras será iniciado.");
+        this.rulesMachine = null;
     }
+
+
+
 
     private void disableAllRules() {
         try {
@@ -124,6 +123,13 @@ public class Semantic {
     private void readAllHeuristic() {
         try {
             Result result = this.executeSWRLQuery(this.SWRLQuery.getParameter("getNameAllHeuristics"));
+
+            // Se não tem engine ou a query falhou, não faz nada
+            if (result == null) {
+                log.msg("No SWRL result for getNameAllHeuristics (rule engine disabled or failed).");
+                return;
+            }
+
             while (result.hasNext()) {
                 Heuristic heuristic = new Heuristic();
                 heuristic.setName(String.valueOf(result.getValue("?nome")));
@@ -140,10 +146,19 @@ public class Semantic {
 
     protected Result executeSWRLQuery(String query) {
         try {
-            if (!this.isQueryInstantiated("SWRL" + query.hashCode())) {
-                rulesMachine.createSQWRLQuery("SWRL" + query.hashCode(), query);
+            // Se não existe engine, nada a fazer
+            if (rulesMachine == null) {
+                log.msg("SWRL rule engine not initialized. Skipping query: " + query);
+                return null;
             }
-            return rulesMachine.runSQWRLQuery("SWRL" + query.hashCode());
+
+            String queryName = "SWRL" + query.hashCode();
+
+            if (!this.isQueryInstantiated(queryName)) {
+                rulesMachine.createSQWRLQuery(queryName, query);
+            }
+
+            return rulesMachine.runSQWRLQuery(queryName);
         } catch (ResultException ex) {
             log.msg(query);
             log.error(ex);
@@ -151,10 +166,15 @@ public class Semantic {
         }
     }
 
+
     private boolean isQueryInstantiated(String nome) {
+        // Sem engine, nenhuma query está instanciada
+        if (rulesMachine == null) {
+            return false;
+        }
+
         try {
-            Set<String> queries;
-            queries = rulesMachine.getSQWRLQueryNames();
+            Set<String> queries = rulesMachine.getSQWRLQueryNames();
             for (String query : queries) {
                 if (nome.equals(query)) {
                     return true;
@@ -166,6 +186,7 @@ public class Semantic {
         }
         return false;
     }
+
 
     private String getIdIndividual() {
         return String.format("%09d", ++counterIndividualsInstantiate);
@@ -241,6 +262,12 @@ public class Semantic {
         try {
             String dml = "";
             Result result = this.executeSWRLQuery(this.SWRLQuery.getParameter("getAllClausuleToDML"));
+
+            if (result == null) {
+                log.msg("No SWRL result for getAllClausuleToDML (rule engine disabled or failed).");
+                return;
+            }
+
             while (result.hasNext()) {
                 if (!dml.equals(result.getValue("?dml").toString())) {
                     dml = result.getValue("?dml").toString();
@@ -251,6 +278,7 @@ public class Semantic {
             log.error(ex);
         }
     }
+
 
     private String infersTheNameBasedOnTheContent(Concept concept) {
         String name = this.getIdIndividual();
@@ -268,15 +296,30 @@ public class Semantic {
 
     private void printAllConceptsInstantiated() {
         if (config.getProperty("debug_all_concepts").equals("1")) {
+
+            if (rulesMachine == null) {
+                log.msg("Rule engine not initialized. Skipping debug of all concepts.");
+                return;
+            }
+
             log.title("debug");
             String query = this.SWRLQuery.getParameter("getAllToDebug");
             Result result = this.executeSWRLQuery(query);
-            this.printResultSet(result);
+
+            if (result != null) {
+                this.printResultSet(result);
+            }
+
             log.endTitle();
         }
     }
 
     protected void printResultSet(Result result) {
+        if (result == null) {
+            log.msg("printResultSet called with null Result. Skipping.");
+            return;
+        }
+
         try {
             String fileLog = "";
             while (result.hasNext()) {
@@ -297,5 +340,6 @@ public class Semantic {
             log.error(ex);
         }
     }
+
 
 }

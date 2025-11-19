@@ -28,26 +28,56 @@ public final class Ontology extends Semantic {
     }
 
     private void readPreConditions() {
-        Result conditions = this.executeSWRLQuery(this.SWRLQuery.getParameter("getAllPreConditions"));
+
+        // Garante que nunca fica null
         this.preConditions = new ArrayList<>();
+
+        // 1) SWRLQuery não foi inicializado
+        if (this.SWRLQuery == null) {
+            System.out.println("[OuterTuning] SWRLQuery é null; motor SWRL não inicializado. Nenhuma pré-condição será carregada.");
+            return;
+        }
+
+        // 2) Recupera a query registrada para pegar todas as pré-condições
+        String query = this.SWRLQuery.getParameter("getAllPreConditions");
+        if (query == null || query.trim().isEmpty()) {
+            System.out.println("[OuterTuning] Parâmetro SWRL 'getAllPreConditions' não definido. Nenhuma pré-condição será carregada.");
+            return;
+        }
+
+        // 3) Executa a query SWRL
+        Result conditions = this.executeSWRLQuery(query);
+
+        // Se o motor SWRL não foi inicializado, ele pode devolver null
+        if (conditions == null) {
+            System.out.println("[OuterTuning] SWRL rule engine não inicializado ou Result == null. Pulando readPreConditions().");
+            return;
+        }
+
         try {
             while (conditions.hasNext()) {
                 Source source = new Source();
-                source.setLibrary(conditions.getValue("?biblioteca").toString());
+
+                // Mesma lógica que você já tinha
+                source.setLibrary(String.valueOf(conditions.getValue("?biblioteca")));
                 source.setPreConditionSQWRL("getAll" + String.valueOf(conditions.getValue("?nome")));
-                source.setOrder(Integer.parseInt(conditions.getValue("?ordem").toString()));
+                source.setOrder(Integer.parseInt(String.valueOf(conditions.getValue("?ordem"))));
                 source.setClassName(String.valueOf(conditions.getValue("?nome")));
                 source.setClassJavaName(String.valueOf(conditions.getValue("?classe")));
                 source.setHeuristic(String.valueOf(conditions.getValue("?heu")));
                 source.setFunctionName(String.valueOf(conditions.getValue("?nomeFuncao")));
                 source.paramOut = this.getAllParametersOut(source);
+
                 this.addPreCondition(source);
                 conditions.next();
             }
         } catch (ResultException ex) {
+            // continua usando o log original
             log.error(ex);
         }
     }
+
+
 
     @Override
     public void readOntology() {
